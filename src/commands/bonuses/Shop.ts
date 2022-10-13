@@ -103,6 +103,7 @@ export = class ShopCommand extends Command {
 
           data.bonuses -= bronzeCost.cost;
           data.roles.push(1);
+          message.member.roles.add("939139061812174908");
 
           client.bonuses.update(data.id, data);
           client.bonuses.createHistoryItem(data.id, {
@@ -156,6 +157,7 @@ export = class ShopCommand extends Command {
 
           data.bonuses -= liteCost.cost;
           data.roles.push(2);
+          message.member.roles.add("939139424200052816");
 
           client.bonuses.update(data.id, data);
           client.bonuses.createHistoryItem(data.id, {
@@ -209,6 +211,7 @@ export = class ShopCommand extends Command {
 
           data.bonuses -= megaCost.cost;
           data.roles.push(3);
+          message.member.roles.add("939139723560120353");
 
           client.bonuses.update(data.id, data);
           client.bonuses.createHistoryItem(data.id, {
