@@ -13,7 +13,7 @@ export = class LobbyAddAccessCommand extends Command {
     });
   }
 
-  run(client: DiscordBot, message: Message, args: string[]) {
+  async run(client: DiscordBot, message: Message, args: string[]) {
     if (!message.member.voice.channel) {
       const embed = this.embed(
         client,
@@ -91,8 +91,13 @@ export = class LobbyAddAccessCommand extends Command {
       bold(`✅ | Был выдан доступ для ${member_or_role.toString()}!`)
     );
 
-    return message.reply({
+    const msg = await message.reply({
       embeds: [embed],
     });
+
+    setTimeout(async () => {
+      await msg.delete();
+      await message.delete();
+    }, 1000);
   }
 };
