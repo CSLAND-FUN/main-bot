@@ -224,6 +224,24 @@ export class LobbysSystem {
     );
 
     this.client.on("voiceStateUpdate", async (oldState, newState) => {
+      async function check_and_delete() {
+        const _channel = this.cache.get(oldState.channel.id);
+        if (!_channel) return;
+
+        const channel = newState.guild.channels.cache.get(oldState.channel.id);
+        if (!channel.isVoiceBased()) return;
+
+        if (
+          oldState.member.id === _channel.owner &&
+          _channel.options.deleteIfOwnerLeaves === true
+        ) {
+          await channel.delete("Владелец вышел из канала");
+          this.cache.delete(channel.id);
+
+          return;
+        }
+      }
+
       if (!oldState.channel && newState.channel) {
         if (newState.channel.parent.id === this.category_id) {
           if (newState.channel.id === this.parent_id) {
@@ -250,21 +268,7 @@ export class LobbysSystem {
           }
         }
       } else if (oldState.channel && !newState.channel) {
-        const _channel = this.cache.get(oldState.channel.id);
-        if (!_channel) return;
-
-        const channel = newState.guild.channels.cache.get(oldState.channel.id);
-        if (!channel.isVoiceBased()) return;
-
-        if (
-          oldState.member.id === _channel.owner &&
-          _channel.options.deleteIfOwnerLeaves === true
-        ) {
-          await channel.delete("Владелец вышел из канала");
-          this.cache.delete(channel.id);
-
-          return;
-        }
+        await check_and_delete();
       } else if (oldState.channel && newState.channel) {
         if (newState.channel.parent.id === this.category_id) {
           if (newState.channel.id === this.parent_id) {
@@ -289,6 +293,8 @@ export class LobbysSystem {
               "Пользователь создал Приватное Лобби."
             );
           }
+        } else {
+          await check_and_delete();
         }
       }
     });
