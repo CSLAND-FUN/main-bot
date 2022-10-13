@@ -1,0 +1,29 @@
+{
+  "name": "main-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/CSLAND-FUN/main-bot.git",
+  "author": "unqxl <andreyzero123@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@discordjs/voice": "^0.13.0",
+    "@distube/spotify": "^1.4.2",
+    "discord.js": "^14.6.0",
+    "distube": "^4.0.4",
+    "enmap": "^5.9.2",
+    "glob": "^8.0.3",
+    "module-alias": "^2.2.2",
+    "node-schedule": "^2.1.0",
+    "random": "^3.0.6"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.0.0",
+    "@types/module-alias": "^2.0.1",
+    "@types/node-schedule": "^2.1.0"
+  },
+  "_moduleAliases": {
+    "@src": "src",
+    "@modules": "modules",
+    "@cfg": "src/config.json"
+  }
+}
