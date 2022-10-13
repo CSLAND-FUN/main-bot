@@ -211,9 +211,16 @@ export class BonusSystem {
       history: [],
     });
 
-    if (typeof amount === "undefined") {
+    if (!amount) {
       to_data.bonuses += from_data.bonuses;
       from_data.bonuses = 0;
+
+      this.db.set(from_data.id, from_data);
+      this.db.set(to_data.id, to_data);
+
+      return {
+        status: true,
+      };
     } else {
       if (from_data.bonuses < amount) {
         return {
@@ -225,14 +232,14 @@ export class BonusSystem {
 
       to_data.bonuses += amount;
       from_data.bonuses -= amount;
+
+      this.db.set(from_data.id, from_data);
+      this.db.set(to_data.id, to_data);
+
+      return {
+        status: true,
+      };
     }
-
-    this.db.set(from_data.id, from_data);
-    this.db.set(to_data.id, to_data);
-
-    return {
-      status: true,
-    };
   }
 
   public data(id: string): BonusUser {

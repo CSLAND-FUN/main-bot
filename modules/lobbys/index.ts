@@ -5,6 +5,7 @@ import {
   GuildMember,
   Role,
   VoiceChannel,
+  VoiceState,
 } from "discord.js";
 
 interface Lobby {
@@ -219,29 +220,13 @@ export class LobbysSystem {
   }
 
   private handle() {
+    if (!this.cache) this.cache = new Collection();
+
     console.log(
       "[Lobby System] Creating Handler for Client#voiceStateUpdate Event...\n"
     );
 
     this.client.on("voiceStateUpdate", async (oldState, newState) => {
-      async function check_and_delete() {
-        const _channel = this.cache.get(oldState.channel.id);
-        if (!_channel) return;
-
-        const channel = newState.guild.channels.cache.get(oldState.channel.id);
-        if (!channel.isVoiceBased()) return;
-
-        if (
-          oldState.member.id === _channel.owner &&
-          _channel.options.deleteIfOwnerLeaves === true
-        ) {
-          await channel.delete("Владелец вышел из канала");
-          this.cache.delete(channel.id);
-
-          return;
-        }
-      }
-
       if (!oldState.channel && newState.channel) {
         if (newState.channel.parent.id === this.category_id) {
           if (newState.channel.id === this.parent_id) {
@@ -268,7 +253,7 @@ export class LobbysSystem {
           }
         }
       } else if (oldState.channel && !newState.channel) {
-        await check_and_delete();
+        await this.check_and_delete(oldState, newState);
       } else if (oldState.channel && newState.channel) {
         if (newState.channel.parent.id === this.category_id) {
           if (newState.channel.id === this.parent_id) {
@@ -294,9 +279,27 @@ export class LobbysSystem {
             );
           }
         } else {
-          await check_and_delete();
+          await this.check_and_delete(oldState, newState);
         }
       }
     });
+  }
+
+  private async check_and_delete(oldState: VoiceState, newState: VoiceState) {
+    const _channel = this.cache.get(oldState.channel.id);
+    if (!_channel) return;
+
+    const channel = newState.guild.channels.cache.get(oldState.channel.id);
+    if (!channel.isVoiceBased()) return;
+
+    if (
+      oldState.member.id === _channel.owner &&
+      _channel.options.deleteIfOwnerLeaves === true
+    ) {
+      await channel.delete("Владелец вышел из канала");
+      this.cache.delete(channel.id);
+
+      return;
+    }
   }
 }
