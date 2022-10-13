@@ -266,20 +266,29 @@ export class LobbysSystem {
           return;
         }
       } else if (oldState.channel && newState.channel) {
-        const _channel = this.cache.get(oldState.channel.id);
-        if (!_channel) return;
+        if (newState.channel.parent.id === this.category_id) {
+          if (newState.channel.id === this.parent_id) {
+            const channel = await newState.guild.channels.create({
+              name: this.channel_name(newState.member.user.tag),
+              type: ChannelType.GuildVoice,
+              parent: this.category_id,
+            });
 
-        const channel = newState.guild.channels.cache.get(oldState.channel.id);
-        if (!channel.isVoiceBased()) return;
+            this.cache.set(channel.id, {
+              id: channel.id,
+              owner: newState.member.id,
+              channel: channel,
 
-        if (
-          oldState.member.id === _channel.owner &&
-          _channel.options.deleteIfOwnerLeaves === true
-        ) {
-          await channel.delete("Владелец вышел из канала");
-          this.cache.delete(channel.id);
+              options: {
+                deleteIfOwnerLeaves: true,
+              },
+            });
 
-          return;
+            newState.member.voice.setChannel(
+              channel,
+              "Пользователь создал Приватное Лобби."
+            );
+          }
         }
       }
     });
