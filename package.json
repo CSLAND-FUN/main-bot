@@ -25,5 +25,9 @@
     "@src": "src",
     "@modules": "modules",
     "@cfg": "src/config.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "cd src && ts-node index.ts"
   }
 }

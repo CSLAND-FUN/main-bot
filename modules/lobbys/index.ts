@@ -3,6 +3,7 @@ import {
   ChannelType,
   Collection,
   GuildMember,
+  OverwriteData,
   Role,
   VoiceChannel,
   VoiceState,
@@ -184,13 +185,17 @@ export class LobbysSystem {
       };
     }
 
+    const overwrites: OverwriteData[] = [];
     for (const [, role] of data.channel.guild.roles.cache) {
-      if (role.tags.botId) continue;
+      if (role.tags && role.tags?.botId) continue;
 
-      data.channel.permissionOverwrites.create(role, {
-        ViewChannel: false,
+      overwrites.push({
+        id: role.id,
+        deny: ["ViewChannel"],
       });
     }
+
+    data.channel.permissionOverwrites.set(overwrites);
 
     return {
       status: true,
@@ -206,13 +211,17 @@ export class LobbysSystem {
       };
     }
 
+    const overwrites: OverwriteData[] = [];
     for (const [, role] of data.channel.guild.roles.cache) {
       if (role.tags.botId) continue;
 
-      data.channel.permissionOverwrites.create(role, {
-        ViewChannel: true,
+      overwrites.push({
+        id: role.id,
+        allow: ["ViewChannel"],
       });
     }
+
+    data.channel.permissionOverwrites.set(overwrites);
 
     return {
       status: true,

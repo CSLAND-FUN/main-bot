@@ -80,6 +80,6 @@ export = class LobbyCloseCommand extends Command {
     setTimeout(async () => {
       await msg.delete();
       await message.delete();
-    }, 1000);
+    }, 2000);
   }
 };
