@@ -8,6 +8,7 @@ import {
   VoiceChannel,
   VoiceState,
 } from "discord.js";
+import { scheduleJob } from "node-schedule";
 
 interface Lobby {
   id: string;
@@ -38,6 +39,19 @@ export class LobbysSystem {
     this.parent_id = parent;
 
     this.handle();
+
+    scheduleJob("0 0 * * *", async () => {
+      console.log("[Lobby System] Cleaning up cache...");
+
+      if (!this.cache.size) {
+        return null;
+      }
+
+      for (const id of this.cache.keys()) {
+        const channel = this.client.channels.cache.get(id);
+        if (!channel) this.cache.delete(id);
+      }
+    });
   }
 
   public checkLobby(id: string) {

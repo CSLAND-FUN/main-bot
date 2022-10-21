@@ -1,6 +1,6 @@
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
-import { Message, VoiceBasedChannel } from "discord.js";
+import { Collection, Message, VoiceBasedChannel } from "discord.js";
 import Enmap from "enmap";
 
 import { cancelJob, Job, scheduleJob } from "node-schedule";
@@ -37,6 +37,7 @@ export enum HistoryType {
 export class BonusSystem {
   public client: DiscordBot;
   public db: Enmap<string, BonusUser>;
+  public cache: Collection<string, string[]>;
 
   constructor(client: DiscordBot) {
     this.client = client;
@@ -45,6 +46,7 @@ export class BonusSystem {
       name: "bonus-system",
       wal: false,
     });
+    this.cache = new Collection();
 
     const keys = this.db.keys();
     var stopped_to = [];
@@ -89,12 +91,30 @@ export class BonusSystem {
     this.db.set(id, data);
 
     const job: Job = scheduleJob("*/5 * * * *", async () => {
-      const newChannel = await this.client.channels.fetch(channel.id);
-      if (!newChannel.isVoiceBased()) return cancelJob(job);
+      var newChannel;
+      try {
+        newChannel = await this.client.channels.fetch(channel.id);
+      } catch (error) {
+        const cached = this.cache.get(channel.id);
+        if (!cached) return cancelJob(job);
 
+        for (const cached_id of cached) {
+          const data = this.db.get(cached_id);
+          if (data.counting === true) data.counting = false;
+
+          this.db.set(data.id, data);
+          console.log(
+            `[Bonus System] Canceled job for ${cached_id} due to channel is deleted.`
+          );
+        }
+
+        return cancelJob(job);
+      }
+
+      if (!newChannel.isVoiceBased()) return cancelJob(job);
       const newData = this.db.fetch(id);
       const members = newChannel.members.filter((m) => {
-        const data = this.db.fetch(m.user.id);
+        const data = this.db.get(m.user.id);
         return !m.user.bot || !data.blacklisted;
       });
 
@@ -427,6 +447,8 @@ export class BonusSystem {
 
         if (members.size >= 2) {
           var _members = [];
+          var ids = [];
+
           for (const [, member] of members) {
             const data = this.db.ensure(member.id, {
               id: member.id,
@@ -444,7 +466,14 @@ export class BonusSystem {
             if (data.counting === true) continue;
 
             _members.push(member.user.tag);
+            ids.push(member.id);
+
             await this.startCount(member.id, newState.channel);
+          }
+
+          if (ids.length) {
+            this.cache.set(newState.channel.id, ids);
+            ids = [];
           }
 
           if (_members.length) {
