@@ -29,7 +29,7 @@ export class LobbysSystem {
   public category_id: string;
   public parent_id: string;
 
-  public channel_name = (tag: string) => `[#${this.cache.size + 1}] ${tag}`;
+  public channel_name = (tag: string) => `#${this.cache.size + 1} ${tag}`;
 
   constructor(client: DiscordBot, category: string, parent: string) {
     this.client = client;
@@ -40,7 +40,7 @@ export class LobbysSystem {
 
     this.handle();
 
-    scheduleJob("0 0 * * *", async () => {
+    scheduleJob("*/5 * * * *", async () => {
       console.log("[Lobby System] Cleaning up cache...");
 
       if (!this.cache.size) {
