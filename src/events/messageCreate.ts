@@ -14,26 +14,36 @@ export = class MessageCreateEvent extends Event {
     const args = message.content.slice("!!!".length).trim().split(" ");
     const cmd = args.shift().toLowerCase();
 
-    const command = client.commands.get(cmd);
+    const command =
+      client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
     if (!command) {
-      return await message.react("❌");
+      const msg = await message.react("❌");
+      setTimeout(async () => {
+        await msg.message.delete();
+      }, 2000);
     }
 
     if (
       command.data.ownerOnly === true &&
       message.author.id !== "852921856800718908"
     ) {
-      return await message.react("❌");
+      const msg = await message.react("❌");
+      setTimeout(async () => {
+        await msg.message.delete();
+      }, 2000);
     }
 
     if (
       command.data.permissions &&
       !message.member.permissions.has(command.data.permissions)
     ) {
-      return await message.react("❌");
+      const msg = await message.react("❌");
+      setTimeout(async () => {
+        await msg.message.delete();
+      }, 2000);
     }
 
+    await command.run(client, message, args);
     await message.react("✅");
-    return await command.run(client, message, args);
   }
 };

@@ -269,10 +269,15 @@ export class LobbysSystem {
               },
             });
 
-            newState.member.voice.setChannel(
-              channel,
-              "Пользователь создал Приватное Лобби."
-            );
+            try {
+              await newState.member.voice.setChannel(
+                channel,
+                "Пользователь создал Приватное Лобби."
+              );
+            } catch (error) {
+              this.cache.delete(channel.id);
+              await channel.delete();
+            }
           }
         }
       } else if (oldState.channel && !newState.channel) {
@@ -296,10 +301,15 @@ export class LobbysSystem {
               },
             });
 
-            newState.member.voice.setChannel(
-              channel,
-              "Пользователь создал Приватное Лобби."
-            );
+            try {
+              await newState.member.voice.setChannel(
+                channel,
+                "Пользователь создал Приватное Лобби."
+              );
+            } catch (error) {
+              this.cache.delete(channel.id);
+              await channel.delete();
+            }
           }
         } else {
           await this.check_and_delete(oldState, newState);

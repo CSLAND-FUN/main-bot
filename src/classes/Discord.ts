@@ -49,6 +49,7 @@ export = class DiscordBot extends Client {
       joinNewVoiceChannel: false,
       plugins: [new SpotifyPlugin()],
 
+      searchSongs: 5,
       leaveOnStop: true,
       leaveOnEmpty: true,
       leaveOnFinish: true,
