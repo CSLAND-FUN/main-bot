@@ -40,7 +40,7 @@ export = class SearchResultEvent extends Event<false, true> {
     const opts = [];
     for (const [id, res] of _results) {
       opts.push({
-        label: res,
+        label: this.truntcate(res),
         value: id,
       });
     }
@@ -85,5 +85,9 @@ export = class SearchResultEvent extends Event<false, true> {
         await msg.delete();
       }
     });
+  }
+
+  truntcate(str: string, length = 50): string {
+    return str.length > length ? str.slice(0, length - 1) + "..." : str;
   }
 };
