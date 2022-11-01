@@ -386,12 +386,15 @@ export class BonusSystem {
     const final = this.db.array();
     const data = final.sort((a, b) => b.bonuses - a.bonuses).slice(0, 49);
 
+    await message.guild.members.fetch();
     for (let i = 0; i < data.length; i++) {
       const info = data[i];
-      const member =
-        (await (
-          await message.guild.members.fetch({ force: true, user: info.id })
-        ).user.toString()) || "Неизвестно#0000";
+
+      var tag = "";
+      var member = message.guild.members.cache.get(info.id);
+      if (!member) {
+        tag = "Неизвестно#0000";
+      } else tag = member.user.toString();
 
       const word = Functions.declOfNum(info.bonuses, [
         "бонус",
@@ -401,7 +404,7 @@ export class BonusSystem {
 
       const index = i + 1;
       const bonuses = info.bonuses.toLocaleString("be");
-      out.push(`**[${index}] ${member.toString()} — ${bonuses} ${word}**`);
+      out.push(`**[${index}] ${tag} — ${bonuses} ${word}**`);
     }
 
     const user_data = final.find((x) => x.id === message.author.id);
