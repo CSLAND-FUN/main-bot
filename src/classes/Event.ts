@@ -1,6 +1,5 @@
-import DiscordBot from "./Discord";
-
 import type { ClientEvents } from "discord.js";
+import DiscordBot from "./Discord";
 
 type DistubeEventsTyped =
   | "error"

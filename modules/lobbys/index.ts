@@ -154,7 +154,8 @@ export class LobbysSystem {
     }
 
     for (const [, role] of data.channel.guild.roles.cache) {
-      if (role.tags.botId) continue;
+      if (role.tags && role.tags.botId) continue;
+      if (role.permissions.has("Administrator")) continue;
 
       data.channel.permissionOverwrites.create(role, {
         Connect: true,
@@ -177,7 +178,8 @@ export class LobbysSystem {
     }
 
     for (const [, role] of data.channel.guild.roles.cache) {
-      if (role.tags.botId) continue;
+      if (role.tags && role.tags.botId) continue;
+      if (role.permissions.has("Administrator")) continue;
 
       data.channel.permissionOverwrites.create(role, {
         Connect: false,
@@ -202,6 +204,7 @@ export class LobbysSystem {
     const overwrites: OverwriteData[] = [];
     for (const [, role] of data.channel.guild.roles.cache) {
       if (role.tags && role.tags?.botId) continue;
+      if (role.permissions.has("Administrator")) continue;
 
       overwrites.push({
         id: role.id,
@@ -227,7 +230,8 @@ export class LobbysSystem {
 
     const overwrites: OverwriteData[] = [];
     for (const [, role] of data.channel.guild.roles.cache) {
-      if (role.tags.botId) continue;
+      if (role.tags && role.tags.botId) continue;
+      if (role.permissions.has("Administrator")) continue;
 
       overwrites.push({
         id: role.id,

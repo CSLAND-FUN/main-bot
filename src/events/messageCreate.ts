@@ -1,6 +1,7 @@
 import DiscordBot from "@src/classes/Discord";
 import { Event } from "@src/classes/Event";
 import { Message } from "discord.js";
+import config from "../config.json";
 
 export = class MessageCreateEvent extends Event {
   constructor() {
@@ -9,13 +10,13 @@ export = class MessageCreateEvent extends Event {
 
   async run(client: DiscordBot, message: Message) {
     if (!message.inGuild() || message.author.bot) return;
-    if (!message.content.startsWith("!!!")) return;
+    if (!message.content.startsWith("!")) return;
 
-    const args = message.content.slice("!!!".length).trim().split(" ");
+    const args = message.content.slice("!".length).trim().split(" ");
     const cmd = args.shift().toLowerCase();
 
-    const command =
-      client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
+    // prettier-ignore
+    const command = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
     if (!command) {
       const msg = await message.react("❌");
       setTimeout(async () => {
@@ -25,7 +26,7 @@ export = class MessageCreateEvent extends Event {
 
     if (
       command.data.ownerOnly === true &&
-      message.author.id !== "852921856800718908"
+      !config.OWNERS.includes(message.author.id)
     ) {
       const msg = await message.react("❌");
       setTimeout(async () => {
@@ -44,6 +45,10 @@ export = class MessageCreateEvent extends Event {
     }
 
     await command.run(client, message, args);
-    await message.react("✅");
+
+    const msg = await message.react("✅");
+    setTimeout(async () => {
+      await msg.message.delete();
+    }, 2000);
   }
 };

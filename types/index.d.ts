@@ -3,7 +3,7 @@ import { Collection } from "discord.js";
 import { Command } from "@src/classes/Command";
 import { Event } from "@src/classes/Event";
 
-import { BonusSystem } from "@modules/bonus-system";
+import { BonusSystem } from "@modules/bonuses";
 import { LobbysSystem } from "@modules/lobbys";
 
 import { DisTube } from "distube";

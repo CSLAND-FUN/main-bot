@@ -1,6 +1,6 @@
 import DiscordBot from "@src/classes/Discord";
 import { Event } from "@src/classes/Event";
-import { bold, EmbedBuilder, GuildMember } from "discord.js";
+import { EmbedBuilder, GuildMember } from "discord.js";
 
 export = class GuildMemberAddEvent extends Event {
   constructor() {
@@ -8,27 +8,25 @@ export = class GuildMemberAddEvent extends Event {
   }
 
   async run(client: DiscordBot, member: GuildMember) {
+    const role = member.guild.roles.cache.get("936677179574599751");
+    if (role) await member.roles.add(role);
+
     client.bonuses.data(member.id);
 
-    const channel = member.guild.channels.cache.get("937777349477404703");
+    const channel = member.guild.channels.cache.get(member.guild.id);
     if (!channel.isTextBased()) return;
 
-    const out = [];
-    out.push(
-      bold(
-        `${member.toString()}, добро пожаловать на официальный сервер проекта CsLand!`
-      ),
-      bold(`Перед началом общения ознакомьтесь с <#936334109041647687>.`),
+    const out = [
+      `**${member.toString()}, добро пожаловать на официальный сервер проекта CsLand!**`,
+      `**Перед началом общения ознакомьтесь с <#936334109041647687>.**`,
       "",
-      bold("Ссылки на нас:"),
-      bold(`Сайт - https://csland.fun/`),
-      bold(`Telegram - https://t.me/csland_project`),
-      bold(`VK Группа - https://vk.com/csland_project`),
-      bold(`TikTok - https://www.tiktok.com/@cs.land`),
-      bold(
-        `YouTube Основателя - https://www.youtube.com/channel/UC8jfl3q-PGVD3yu8IP2H2cQ`
-      )
-    );
+      "**Ссылки на нас:**",
+      `**Сайт - https://csland.fun/**`,
+      `**Telegram - https://t.me/csland_project**`,
+      `**Группа в VK - https://vk.com/csland_project**`,
+      `**TikTok - https://www.tiktok.com/@cs.land**`,
+      `**YouTube Основателя - https://www.youtube.com/channel/UC8jfl3q-PGVD3yu8IP2H2cQ**`,
+    ].join("\n");
 
     const embed = new EmbedBuilder();
     embed.setColor("DarkPurple");
@@ -36,7 +34,7 @@ export = class GuildMemberAddEvent extends Event {
       name: member.user.tag,
       iconURL: member.avatarURL(),
     });
-    embed.setDescription(out.join("\n"));
+    embed.setDescription(out);
 
     await channel.send({
       content: member.toString(),

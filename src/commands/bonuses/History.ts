@@ -1,4 +1,4 @@
-import { HistoryType } from "@modules/bonus-system";
+import { HistoryType } from "@modules/bonuses";
 import { Command, CommandCategory } from "@src/classes/Command";
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";

@@ -3,9 +3,9 @@ import EventEmitter from "node:events";
 import Glob from "glob";
 import { promisify } from "util";
 
-import { Command } from "./Command";
+import type { Command } from "./Command";
 import DiscordBot from "./Discord";
-import { Event } from "./Event";
+import type { Event } from "./Event";
 
 import path from "path";
 
@@ -27,6 +27,7 @@ export = class Handler {
     const events = await glob(eventsDir);
     const commands = await glob(commandsDir);
 
+    const envOut = [];
     for (const eventPath of events) {
       const eventFile = await (
         await import(path.resolve(process.cwd(), eventPath))
@@ -48,9 +49,13 @@ export = class Handler {
         });
       }
 
-      console.log(`[Handler] Loaded "${event.name}" Event!`);
+      envOut.push(`[Handler] Loaded "${event.name}" Event!`);
     }
 
+    console.log(envOut.join("\n"));
+    console.log("\n");
+
+    const cmdOut = [];
     for (const commandPath of commands) {
       const commandFile = await (
         await import(path.resolve(process.cwd(), commandPath))
@@ -64,7 +69,10 @@ export = class Handler {
       }
 
       this.client.commands.set(command.data.name, command);
-      console.log(`[Handler] Loaded "${command.data.name}" Command!`);
+      cmdOut.push(`[Handler] Loaded "${command.data.name}" Command!`);
     }
+
+    console.log(cmdOut.join("\n"));
+    console.log("\n");
   }
 };

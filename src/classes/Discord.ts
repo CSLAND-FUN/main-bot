@@ -4,7 +4,7 @@ import config from "../config.json";
 import Handler from "./Handler";
 
 import { SpotifyPlugin } from "@distube/spotify";
-import { BonusSystem } from "@modules/bonus-system";
+import { BonusSystem } from "@modules/bonuses";
 import { LobbysSystem } from "@modules/lobbys";
 
 export = class DiscordBot extends Client {
@@ -23,6 +23,7 @@ export = class DiscordBot extends Client {
       },
 
       presence: {
+        status: "dnd",
         activities: [
           {
             type: ActivityType.Competing,
@@ -38,11 +39,7 @@ export = class DiscordBot extends Client {
     this.events = new Collection();
 
     this.bonuses = new BonusSystem(this);
-    this.lobbys = new LobbysSystem(
-      this,
-      "936993360697233468",
-      "936993675622371400"
-    );
+    this.lobbys = new LobbysSystem(this, config.CATEGORY_ID, config.PARENT_ID);
 
     this.player = new DisTube(this, {
       emptyCooldown: 15000,
