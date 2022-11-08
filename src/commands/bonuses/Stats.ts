@@ -16,8 +16,8 @@ export = class StatsCommand extends Command {
     });
   }
 
-  run(client: DiscordBot, message: Message, args: string[]) {
-    const data = client.bonuses.data(message.author.id);
+  async run(client: DiscordBot, message: Message, args: string[]) {
+    const data = await client.bonuses.data(message.author.id);
     const word = Functions.declOfNum(data.bonuses, [
       "бонус",
       "бонуса",
@@ -26,9 +26,11 @@ export = class StatsCommand extends Command {
 
     const res = [];
     res.push(`› **Баланс**: **${data.bonuses.toLocaleString("be")} ${word}**`);
-    res.push(`› **Купленные роли**: **${this.getRoles(client, data.id)}**`);
+    res.push(
+      `› **Купленные роли**: **${await this.getRoles(client, data.id)}**`
+    );
 
-    if (data.blacklisted === true) {
+    if (data.blacklisted === 1) {
       res.push("");
       res.push("⚠️ | **Вы внесены в чёрный список бонусной системы!**");
       res.push(`**Причина: ${data.reason}**`);
@@ -47,13 +49,13 @@ export = class StatsCommand extends Command {
     });
   }
 
-  getRoles(client: DiscordBot, id: string): string {
-    const data = client.bonuses.data(id);
-    if (!data.roles.length) return "Отсутствуют";
+  async getRoles(client: DiscordBot, id: string): Promise<string> {
+    const data = await client.bonuses.data(id);
+    if (!data.roles) return "Отсутствуют";
 
     const out = [];
     for (const _role of data.roles) {
-      const role = config.ROLES.find((x) => x.role_num === _role);
+      const role = config.ROLES.find((x) => x.role_num === Number(_role));
       out.push(role.role_name);
     }
 

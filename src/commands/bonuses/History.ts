@@ -1,4 +1,4 @@
-import { HistoryType } from "@modules/bonuses";
+import { HistoryType, UserHistoryItem } from "@modules/bonuses";
 import { Command, CommandCategory } from "@src/classes/Command";
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
@@ -14,9 +14,14 @@ export = class HistoryCommand extends Command {
     });
   }
 
-  run(client: DiscordBot, message: Message, args: string[]) {
-    const data = client.bonuses.data(message.author.id);
-    if (!data.history.length) {
+  async run(client: DiscordBot, message: Message, args: string[]) {
+    const data = await client.bonuses
+      .knex<UserHistoryItem>("bonus_users_history")
+      .select()
+      .where({ user_id: message.author.id })
+      .finally();
+
+    if (!data.length) {
       const embed = this.embed(
         client,
         message,
@@ -38,7 +43,7 @@ export = class HistoryCommand extends Command {
       iconURL: message.author.avatarURL(),
     });
 
-    for (const entry of data.history) {
+    for (const entry of data) {
       const type =
         entry.type === HistoryType.BONUS
           ? "Покупка за бонусы"
@@ -54,7 +59,10 @@ export = class HistoryCommand extends Command {
         name: `[#] ${bold(type)}`,
         value: [
           `› **Цена**: ${bold(`${entry.cost} ${word}`)}`,
-          `› **Время покупки**: ${time(Math.floor(1665658126264 / 1000), "R")}`,
+          `› **Время покупки**: ${time(
+            Math.floor(Number(entry.time) / 1000),
+            "R"
+          )}`,
         ].join("\n"),
       });
     }

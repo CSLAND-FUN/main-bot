@@ -10,9 +10,9 @@ export = class MessageCreateEvent extends Event {
 
   async run(client: DiscordBot, message: Message) {
     if (!message.inGuild() || message.author.bot) return;
-    if (!message.content.startsWith("!")) return;
+    if (!message.content.startsWith("!!!")) return;
 
-    const args = message.content.slice("!".length).trim().split(" ");
+    const args = message.content.slice("!!!".length).trim().split(" ");
     const cmd = args.shift().toLowerCase();
 
     // prettier-ignore
@@ -45,10 +45,6 @@ export = class MessageCreateEvent extends Event {
     }
 
     await command.run(client, message, args);
-
-    const msg = await message.react("✅");
-    setTimeout(async () => {
-      await msg.message.delete();
-    }, 2000);
+    await message.react("✅");
   }
 };

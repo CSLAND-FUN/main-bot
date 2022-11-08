@@ -1,32 +1,43 @@
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
-import { Collection, Message, VoiceBasedChannel } from "discord.js";
+import { Channel, Collection, Message, VoiceBasedChannel } from "discord.js";
 import Enmap from "enmap";
 
 import { cancelJob, Job, scheduleJob } from "node-schedule";
 import random from "random";
 
-interface BonusUser {
+import Knex from "knex";
+import config from "../../src/config.json";
+const knex = Knex({
+  client: "mysql",
+  connection: {
+    host: config.DATABASE.HOST,
+    user: config.DATABASE.USER,
+    password: config.DATABASE.PASS,
+    database: config.DATABASE.DATABASE,
+  },
+});
+
+export interface BonusUser {
   id: string;
 
   bonuses: number;
-  roles: number[];
+  roles: string;
 
-  counting: boolean;
-  blacklisted: boolean;
+  counting: 0 | 1;
+  blacklisted: 0 | 1;
   reason: string;
-
-  history: UserHistoryItem[];
 }
 
-interface UserHistoryItem {
+export interface UserHistoryItem {
   id?: number;
-  type: HistoryType;
 
+  user_id: string;
+  type: "BONUS" | "PRIVILEGE";
   message: string;
 
   cost: number;
-  date: number;
+  time: string;
 }
 
 export enum HistoryType {
@@ -37,6 +48,7 @@ export enum HistoryType {
 export class BonusSystem {
   public client: DiscordBot;
   public db: Enmap<string, BonusUser>;
+  public knex: typeof knex;
   public cache: Collection<string, string[]>;
 
   constructor(client: DiscordBot) {
@@ -46,52 +58,19 @@ export class BonusSystem {
       name: "bonus-system",
       wal: false,
     });
+    this.knex = knex;
     this.cache = new Collection();
 
-    const keys = this.db.keys();
-    var stopped_to = [];
-    for (const key of keys) {
-      const data = this.db.ensure(key, {
-        id: key,
-
-        bonuses: 0,
-        roles: [],
-
-        counting: false,
-        blacklisted: false,
-        reason: null,
-
-        history: [],
-      });
-
-      if (data.counting !== true) continue;
-
-      data.counting = false;
-      stopped_to.push(key);
-
-      this.db.set(key, data);
-    }
-
-    if (stopped_to.length) {
-      console.log(
-        `[Bonus System] Stopped counting for ${stopped_to.join(
-          ", "
-        )} due to restart of the script.`
-      );
-
-      stopped_to = [];
-    }
-
+    this.handle_database();
     this.handle();
   }
 
-  public startCount(id: string, channel: VoiceBasedChannel) {
-    const data = this.db.fetch(id);
-    data.counting = true;
-    this.db.set(id, data);
+  async startCount(id: string, channel: VoiceBasedChannel) {
+    await this.data(id);
+    await this.update(id, "counting", 1);
 
     const job: Job = scheduleJob("*/5 * * * *", async () => {
-      var newChannel;
+      var newChannel: Channel;
       try {
         newChannel = await this.client.channels.fetch(channel.id);
       } catch (error) {
@@ -99,10 +78,9 @@ export class BonusSystem {
         if (!cached) return cancelJob(job);
 
         for (const cached_id of cached) {
-          const data = this.db.get(cached_id);
-          if (data.counting === true) data.counting = false;
+          const data = await this.data(cached_id);
+          if (data.counting) await this.update(cached_id, "counting", 0);
 
-          this.db.set(data.id, data);
           console.log(
             `[Bonus System] Canceled job for ${cached_id} due to channel is deleted.`
           );
@@ -112,21 +90,20 @@ export class BonusSystem {
       }
 
       if (!newChannel.isVoiceBased()) return cancelJob(job);
-      const newData = this.db.fetch(id);
-      const members = newChannel.members.filter((m) => {
-        const data = this.db.get(m.user.id);
-        return !m.user.bot || !data.blacklisted;
+
+      const newData = await this.data(id);
+      const members = newChannel.members.filter(async (m) => {
+        const data = await this.data(m.id);
+        return !m.user.bot || data.blacklisted !== 1;
       });
 
       if (members.size < 2) {
         const _members = [];
-        if (newData.counting === true) {
-          newData.counting = false;
+        if (newData.counting === 1) {
+          await this.update(newData.id, "counting", 0);
         }
 
         _members.push(newData.id);
-        this.db.set(id, newData);
-
         console.log(
           `[Bonus System] Stopped counting for ${_members.join(", ")}.`
         );
@@ -134,109 +111,61 @@ export class BonusSystem {
         return cancelJob(job);
       }
 
-      const users = this.db.array();
+      const users = await this.all();
       for (const u of users) {
-        if (u.counting === false) continue;
+        if (u.counting === 0) continue;
 
         const member = newChannel.guild.members.cache.get(u.id);
         if (!member.voice.channel) {
-          u.counting = false;
+          await this.update(u.id, "counting", 0);
         }
-
-        this.db.set(u.id, u);
       }
 
-      const _new_data = this.db.fetch(newData.id);
-      if (_new_data.counting === true) {
-        newData.bonuses += random.int(2, 7);
-        this.db.set(id, newData);
+      const _new_data = await this.data(newData.id);
+      if (_new_data.counting === 1) {
+        await this.update(
+          newData.id,
+          "bonuses",
+          newData.bonuses + random.int(2, 7)
+        );
       }
     });
 
     return true;
   }
 
-  public blacklist(id: string, reason = "Нарушение правил") {
-    const data = this.db.ensure(id, {
-      id: id,
-
-      bonuses: 0,
-      roles: [],
-
-      counting: false,
-      blacklisted: false,
-      reason: null,
-
-      history: [],
-    });
-
-    data.blacklisted = true;
-    data.reason = reason;
-
-    this.db.set(id, data);
+  async blacklist(id: string, reason = "Нарушение правил") {
+    await this.data(id);
+    await this.update(id, "blacklisted", 1);
+    await this.update(id, "reason", reason);
 
     return true;
   }
 
-  public whitelist(id: string) {
-    const data = this.db.ensure(id, {
-      id: id,
-
-      bonuses: 0,
-      roles: [],
-
-      counting: false,
-      blacklisted: false,
-      reason: null,
-
-      history: [],
-    });
-
-    data.blacklisted = false;
-    data.reason = null;
-
-    this.db.set(id, data);
+  async whitelist(id: string) {
+    await this.data(id);
+    await this.update(id, "blacklisted", 0);
+    await this.update(id, "reason", null);
 
     return true;
   }
 
-  public transfer(
+  async transfer(
     from: string,
     to: string,
     amount?: number
-  ): { status: boolean; message?: string } {
-    const from_data = this.db.ensure(from, {
-      id: from,
-
-      bonuses: 0,
-      roles: [],
-
-      counting: false,
-      blacklisted: false,
-      reason: null,
-
-      history: [],
-    });
-
-    const to_data = this.db.ensure(to, {
-      id: to,
-
-      bonuses: 0,
-      roles: [],
-
-      counting: false,
-      blacklisted: false,
-      reason: null,
-
-      history: [],
-    });
+  ): Promise<{ status: boolean; message?: string }> {
+    const from_data = await this.data(from);
+    const to_data = await this.data(to);
 
     if (!amount) {
-      to_data.bonuses += from_data.bonuses;
-      from_data.bonuses = 0;
+      await this.update(
+        to_data.id,
+        "bonuses",
+        to_data.bonuses + from_data.bonuses
+      );
 
-      this.db.set(from_data.id, from_data);
-      this.db.set(to_data.id, to_data);
+      await this.update(from_data.id, "bonuses", 0);
 
       return {
         status: true,
@@ -250,11 +179,8 @@ export class BonusSystem {
         };
       }
 
-      to_data.bonuses += amount;
-      from_data.bonuses -= amount;
-
-      this.db.set(from_data.id, from_data);
-      this.db.set(to_data.id, to_data);
+      await this.update(to_data.id, "bonuses", to_data.bonuses + amount);
+      await this.update(from_data.id, "bonuses", from_data.bonuses - amount);
 
       return {
         status: true,
@@ -262,129 +188,95 @@ export class BonusSystem {
     }
   }
 
-  public data(id: string): BonusUser {
-    const data = this.db.ensure(id, {
-      id: id,
-
-      bonuses: 0,
-      roles: [],
-
-      counting: false,
-      blacklisted: false,
-      reason: null,
-
-      history: [],
-    });
-
+  async all(): Promise<BonusUser[]> {
+    const data = await this.knex<BonusUser>("bonus_users").select().finally();
     return data;
   }
 
-  public update(id: string, new_data: BonusUser): boolean {
-    var data = this.db.ensure(id, {
-      id: id,
+  async data(id: string): Promise<BonusUser> {
+    var _data = await this.knex<BonusUser>("bonus_users")
+      .select()
+      .where({ id: id })
+      .finally();
 
-      bonuses: 0,
-      roles: [],
+    if (!_data.length) {
+      await this.knex<BonusUser>("bonus_users")
+        .insert({
+          id: id,
 
-      counting: false,
-      blacklisted: false,
-      reason: null,
+          bonuses: 0,
+          roles: null,
 
-      history: [],
-    });
+          counting: 0,
+          blacklisted: 0,
+          reason: null,
+        })
+        .finally();
 
-    data = new_data;
-    this.db.set(data.id, data);
+      _data = await this.knex<BonusUser>("bonus_users")
+        .select()
+        .where({ id: id })
+        .finally();
+    }
+
+    const data = _data[0];
+    return data;
+  }
+
+  async update<K extends keyof BonusUser, V extends BonusUser[K]>(
+    id: string,
+    key: K,
+    value: V
+  ): Promise<boolean> {
+    await this.data(id);
+    await this.knex<BonusUser>("bonus_users")
+      .update({
+        [key]: value,
+      })
+      .where({ id: id });
 
     return true;
   }
 
-  public add(id: string, amount: number): boolean {
-    var data = this.db.ensure(id, {
-      id: id,
-
-      bonuses: 0,
-      roles: [],
-
-      counting: false,
-      blacklisted: false,
-      reason: null,
-
-      history: [],
-    });
-
-    data.bonuses += amount;
-    this.update(data.id, data);
+  async add(id: string, amount: number): Promise<boolean> {
+    const data = await this.data(id);
+    await this.update(id, "bonuses", data.bonuses + amount);
 
     return true;
   }
 
-  public subtract(id: string, amount: number): boolean {
-    var data = this.db.ensure(id, {
-      id: id,
-
-      bonuses: 0,
-      roles: [],
-
-      counting: false,
-      blacklisted: false,
-      reason: null,
-
-      history: [],
-    });
-
-    data.bonuses -= amount;
-    this.db.set(data.id, data);
+  async subtract(id: string, amount: number): Promise<boolean> {
+    const data = await this.data(id);
+    await this.update(id, "bonuses", data.bonuses - amount);
 
     return true;
   }
 
-  public set(id: string, amount: number): boolean {
-    var data = this.db.ensure(id, {
-      id: id,
-
-      bonuses: 0,
-      roles: [],
-
-      counting: false,
-      blacklisted: false,
-      reason: null,
-
-      history: [],
-    });
-
-    data.bonuses = amount;
-    this.db.set(data.id, data);
+  async set(id: string, amount: number): Promise<boolean> {
+    await this.data(id);
+    await this.update(id, "bonuses", amount);
 
     return true;
   }
 
-  public createHistoryItem(id: string, item: UserHistoryItem): boolean {
-    var data = this.db.ensure(id, {
-      id: id,
+  async createHistoryItem(id: string, item: UserHistoryItem): Promise<boolean> {
+    const all = await await this.knex<UserHistoryItem>("bonus_users_history")
+      .select()
+      .finally();
 
-      bonuses: 0,
-      roles: [],
-
-      counting: false,
-      blacklisted: false,
-      reason: null,
-
-      history: [],
+    await this.knex<UserHistoryItem>("bonus_users_history").insert({
+      id: all.length + 1,
+      ...item,
     });
 
-    item.id = data.history.length + 1;
-    data.history.push(item);
-
-    this.db.set(data.id, data);
     return true;
   }
 
-  public async top(message: Message) {
+  async top(message: Message) {
     const out = [];
 
-    const final = this.db.array();
-    const data = final.sort((a, b) => b.bonuses - a.bonuses).slice(0, 49);
+    const final = await this.all();
+    const data = final.sort((a, b) => b.bonuses - a.bonuses).slice(0, 50);
 
     await message.guild.members.fetch();
     for (let i = 0; i < data.length; i++) {
@@ -428,24 +320,12 @@ export class BonusSystem {
 
     this.client.on("voiceStateUpdate", async (oldState, newState) => {
       if (oldState.member.user.bot || newState.member.user.bot) return;
-
-      this.db.ensure(newState.member.id, {
-        id: newState.member.id,
-
-        bonuses: 0,
-        roles: [],
-
-        counting: false,
-        blacklisted: false,
-        reason: null,
-
-        history: [],
-      });
+      await this.data(newState.member.id);
 
       if (!oldState.channel && newState.channel) {
-        const members = newState.channel.members.filter((m) => {
-          const data = this.db.fetch(m.user.id);
-          return !m.user.bot || data.blacklisted === false;
+        const members = newState.channel.members.filter(async (m) => {
+          const data = await this.data(m.id);
+          return !m.user.bot || data.blacklisted !== 1;
         });
 
         if (members.size >= 2) {
@@ -453,20 +333,8 @@ export class BonusSystem {
           var ids = [];
 
           for (const [, member] of members) {
-            const data = this.db.ensure(member.id, {
-              id: member.id,
-
-              bonuses: 0,
-              roles: [],
-
-              counting: false,
-              blacklisted: false,
-              reason: null,
-
-              history: [],
-            });
-
-            if (data.counting === true) continue;
+            const data = await this.data(member.id);
+            if (data.counting === 1) continue;
 
             _members.push(member.user.tag);
             ids.push(member.id);
@@ -481,7 +349,7 @@ export class BonusSystem {
 
           if (_members.length) {
             console.log(
-              `\n[Bonus System] Starting Count for ${_members.join(", ")}...\n`
+              `[Bonus System] Starting Count for ${_members.join(", ")}...`
             );
 
             _members = [];
@@ -489,5 +357,41 @@ export class BonusSystem {
         }
       }
     });
+  }
+
+  private async handle_database() {
+    var bonuses_table = "bonus_users";
+    const bonuses_table_check = await this.knex.schema.hasTable(bonuses_table);
+    if (!bonuses_table_check) {
+      await this.knex.schema.createTable("bonus_users", (table) => {
+        table.string("id", 50).notNullable();
+
+        table.integer("bonuses", 255).defaultTo(0);
+        table.string("roles", 3).nullable();
+
+        table.boolean("counting").defaultTo(false);
+        table.boolean("blacklisted").defaultTo(false);
+        table.string("reason", 255).nullable();
+
+        return table;
+      });
+    }
+
+    var history_table = "bonus_users_history";
+    const history_table_check = await this.knex.schema.hasTable(history_table);
+    if (!history_table_check) {
+      await this.knex.schema.createTable("bonus_users_history", (table) => {
+        table.increments("id").primary();
+
+        table.string("user_id", 50).notNullable();
+        table.string("type", 10).notNullable();
+        table.string("message", 255).notNullable();
+
+        table.integer("cost", 255).notNullable();
+        table.string("time", 255).notNullable();
+
+        return table;
+      });
+    }
   }
 }

@@ -11,7 +11,7 @@ export = class GuildMemberAddEvent extends Event {
     const role = member.guild.roles.cache.get("936677179574599751");
     if (role) await member.roles.add(role);
 
-    client.bonuses.data(member.id);
+    await client.bonuses.data(member.id);
 
     const channel = member.guild.channels.cache.get(member.guild.id);
     if (!channel.isTextBased()) return;

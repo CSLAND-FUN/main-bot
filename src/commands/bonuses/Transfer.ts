@@ -12,7 +12,7 @@ export = class PayCommand extends Command {
     });
   }
 
-  run(client: DiscordBot, message: Message, args: string[]) {
+  async run(client: DiscordBot, message: Message, args: string[]) {
     const member = message.mentions.members.first();
     if (!member) {
       const embed = this.embed(
@@ -54,7 +54,7 @@ export = class PayCommand extends Command {
       });
     }
 
-    const result = client.bonuses.transfer(message.author.id, member.id);
+    const result = await client.bonuses.transfer(message.author.id, member.id);
     if ("message" in result) {
       const embed = this.embed(
         client,

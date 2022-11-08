@@ -22,11 +22,11 @@ export = class ShopCommand extends Command {
   }
 
   async run(client: DiscordBot, message: Message, args: string[]) {
-    const data = client.bonuses.data(message.author.id);
+    const data = await client.bonuses.data(message.author.id);
 
-    const bronzeCost = this.getCost(client, data.id, 1);
-    const liteCost = this.getCost(client, data.id, 2);
-    const megaCost = this.getCost(client, data.id, 3);
+    const bronzeCost = await this.getCost(client, data.id, 1);
+    const liteCost = await this.getCost(client, data.id, 2);
+    const megaCost = await this.getCost(client, data.id, 3);
 
     const bronzeText = this.getInfo("bronze", bronzeCost.string);
     const liteText = this.getInfo("lite", liteCost.string);
@@ -44,21 +44,21 @@ export = class ShopCommand extends Command {
         .setStyle(ButtonStyle.Primary)
         .setEmoji("1️⃣")
         .setLabel("Купить Bronze")
-        .setDisabled(data.roles.includes(1)),
+        .setDisabled(data.roles.includes("1")),
 
       new ButtonBuilder()
         .setCustomId("buy-lite")
         .setStyle(ButtonStyle.Primary)
         .setEmoji("2️⃣")
         .setLabel("Купить Lite")
-        .setDisabled(data.roles.includes(2)),
+        .setDisabled(data.roles.includes("2")),
 
       new ButtonBuilder()
         .setCustomId("buy-mega")
         .setStyle(ButtonStyle.Primary)
         .setEmoji("3️⃣")
         .setLabel("Купить MEGA")
-        .setDisabled(data.roles.includes(3))
+        .setDisabled(data.roles.includes("3"))
     );
 
     const msg = await message.reply({
@@ -101,17 +101,27 @@ export = class ShopCommand extends Command {
             break;
           }
 
-          data.bonuses -= bronzeCost.cost;
-          data.roles.push(1);
-          message.member.roles.add("939139061812174908");
+          await client.bonuses.update(
+            message.author.id,
+            "bonuses",
+            data.bonuses - bronzeCost.cost
+          );
 
-          client.bonuses.update(data.id, data);
-          client.bonuses.createHistoryItem(data.id, {
+          await client.bonuses.update(
+            message.author.id,
+            "roles",
+            data.roles + "1"
+          );
+
+          message.member.roles.add("939139061812174908");
+          await client.bonuses.createHistoryItem(data.id, {
             type: HistoryType.BONUS,
 
-            cost: bronzeCost.cost,
-            date: Date.now(),
+            user_id: message.author.id,
             message: "Покупка роли Bronze",
+
+            cost: bronzeCost.cost,
+            time: Date.now().toString(),
           });
 
           const embed = this.embed(
@@ -155,17 +165,27 @@ export = class ShopCommand extends Command {
             break;
           }
 
-          data.bonuses -= liteCost.cost;
-          data.roles.push(2);
-          message.member.roles.add("939139424200052816");
+          await client.bonuses.update(
+            message.author.id,
+            "bonuses",
+            data.bonuses - liteCost.cost
+          );
 
-          client.bonuses.update(data.id, data);
-          client.bonuses.createHistoryItem(data.id, {
+          await client.bonuses.update(
+            message.author.id,
+            "roles",
+            data.roles + "2"
+          );
+
+          message.member.roles.add("939139424200052816");
+          await client.bonuses.createHistoryItem(data.id, {
             type: HistoryType.BONUS,
 
-            cost: liteCost.cost,
-            date: Date.now(),
+            user_id: message.author.id,
             message: "Покупка роли Lite",
+
+            cost: liteCost.cost,
+            time: Date.now().toString(),
           });
 
           const embed = this.embed(
@@ -209,17 +229,27 @@ export = class ShopCommand extends Command {
             break;
           }
 
-          data.bonuses -= megaCost.cost;
-          data.roles.push(3);
-          message.member.roles.add("939139723560120353");
+          await client.bonuses.update(
+            message.author.id,
+            "bonuses",
+            data.bonuses - megaCost.cost
+          );
 
-          client.bonuses.update(data.id, data);
-          client.bonuses.createHistoryItem(data.id, {
+          await client.bonuses.update(
+            message.author.id,
+            "roles",
+            data.roles + "3"
+          );
+
+          message.member.roles.add("939139723560120353");
+          await client.bonuses.createHistoryItem(data.id, {
             type: HistoryType.BONUS,
 
-            cost: megaCost.cost,
-            date: Date.now(),
+            user_id: message.author.id,
             message: "Покупка роли MEGA",
+
+            cost: megaCost.cost,
+            time: Date.now().toString(),
           });
 
           const embed = this.embed(
@@ -250,12 +280,12 @@ export = class ShopCommand extends Command {
     });
   }
 
-  getCost(
+  async getCost(
     client: DiscordBot,
     id: string,
     role_num: number
-  ): { cost: number; string: string } {
-    const data = client.bonuses.data(id);
+  ): Promise<{ cost: number; string: string }> {
+    const data = await client.bonuses.data(id);
 
     if (role_num === 1) {
       return {
@@ -263,7 +293,7 @@ export = class ShopCommand extends Command {
         string: "3000 бонусов",
       };
     } else if (role_num === 2) {
-      if (data.roles.includes(1)) {
+      if (data.roles.includes("1")) {
         return {
           cost: 5000,
           string: "5000 бонусов",
@@ -275,12 +305,12 @@ export = class ShopCommand extends Command {
         string: "8000 бонусов",
       };
     } else if (role_num === 3) {
-      if (data.roles.includes(2)) {
+      if (data.roles.includes("2")) {
         return {
           cost: 5000,
           string: "5000 бонусов",
         };
-      } else if (data.roles.includes(1)) {
+      } else if (data.roles.includes("1")) {
         return {
           cost: 10000,
           string: "10000 бонусов",
