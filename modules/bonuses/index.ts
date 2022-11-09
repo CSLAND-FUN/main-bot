@@ -1,7 +1,6 @@
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
 import { Channel, Collection, Message, VoiceBasedChannel } from "discord.js";
-import Enmap from "enmap";
 
 import { cancelJob, Job, scheduleJob } from "node-schedule";
 import random from "random";
@@ -47,17 +46,11 @@ export enum HistoryType {
 
 export class BonusSystem {
   public client: DiscordBot;
-  public db: Enmap<string, BonusUser>;
   public knex: typeof knex;
   public cache: Collection<string, string[]>;
 
   constructor(client: DiscordBot) {
     this.client = client;
-    this.db = new Enmap({
-      dataDir: "./database",
-      name: "bonus-system",
-      wal: false,
-    });
     this.knex = knex;
     this.cache = new Collection();
 
