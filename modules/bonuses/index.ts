@@ -55,6 +55,7 @@ export class BonusSystem {
     this.cache = new Collection();
 
     this.handle_database();
+    this.checker();
     this.handle();
   }
 
@@ -91,22 +92,24 @@ export class BonusSystem {
       });
 
       if (members.size < 2) {
-        const _members = [];
-        if (newData.counting === 1) {
-          await this.update(newData.id, "counting", 0);
-        }
+        for (const [, member] of members) {
+          const _members = [];
+          if (newData.counting === 1) {
+            await this.update(member.id, "counting", 0);
+          }
 
-        _members.push(newData.id);
-        console.log(
-          `[Bonus System] Stopped counting for ${_members.join(", ")}.`
-        );
+          _members.push(member.id);
+          console.log(
+            `[Bonus System] Stopped counting for ${_members.join(", ")}.`
+          );
+        }
 
         return cancelJob(job);
       }
 
       const users = await this.all();
       for (const u of users) {
-        if (u.counting === 0) continue;
+        if (u.counting !== 1) continue;
 
         const member = newChannel.guild.members.cache.get(u.id);
         if (!member.voice.channel) {
@@ -385,6 +388,28 @@ export class BonusSystem {
 
         return table;
       });
+    }
+  }
+
+  private async checker() {
+    const guild = this.client.guilds.cache.get(config.SERVER_ID);
+    if (!guild) return;
+
+    const all_user_ids = await this.knex<BonusUser>("bonus_users")
+      .select("id")
+      .finally();
+
+    for (const id in all_user_ids) {
+      const member = guild.members.cache.get(id);
+      if (!member) continue;
+
+      const data = await this.data(id);
+      if (data.counting !== 1) continue;
+
+      await this.update(id, "counting", 0);
+      console.log(
+        `[Bonus System] Stopped counting for ${id} due to bot restart.`
+      );
     }
   }
 }
