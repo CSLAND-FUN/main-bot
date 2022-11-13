@@ -354,9 +354,10 @@ export class BonusSystem {
     if (!bonuses_table_check) {
       await this.knex.schema.createTable("bonus_users", (table) => {
         table.string("id", 50).notNullable();
+        table.integer("role", 1).notNullable().defaultTo(1);
 
-        table.integer("bonuses", 255).defaultTo(0);
-        table.string("roles", 3).nullable();
+        table.integer("bonuses", 255).notNullable().defaultTo(0);
+        table.string("roles", 3).notNullable().defaultTo("");
 
         table.boolean("counting").defaultTo(false);
         table.boolean("blacklisted").defaultTo(false);
