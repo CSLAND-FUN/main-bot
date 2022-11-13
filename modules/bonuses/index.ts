@@ -24,6 +24,7 @@ const knex = Knex({
 
 export interface BonusUser {
   id: string;
+  group: number;
 
   bonuses: number;
   roles: string;
@@ -343,6 +344,39 @@ export class BonusSystem {
             await this.startCount(member.id, newState.channel);
             console.log(`[Bonus System] Started job for ${member.user.tag}`);
           }
+        }
+      } else if (oldState.channel && !newState.channel) {
+        const old_members = oldState.channel.members.filter(async (m) => {
+          const data = await this.data(m.id);
+          return !m.user.bot || data.blacklisted !== 1;
+        });
+
+        const new_members = newState.channel.members.filter(async (m) => {
+          const data = await this.data(m.id);
+          return !m.user.bot || data.blacklisted !== 1;
+        });
+
+        if (old_members.size >= 2 && new_members.size < 2) {
+          for (const [, member] of new_members) {
+            const job = this.jobs.get(member.id);
+            if (!job) continue;
+
+            await this.update(member.id, "counting", 0);
+            cancelJob(job);
+          }
+
+          for (const [, member] of old_members) {
+            const job = this.jobs.get(member.id);
+            if (!job) continue;
+
+            const data = await this.data(member.id);
+            if (data.counting === 0) continue;
+
+            await this.update(member.id, "counting", 0);
+            cancelJob(job);
+          }
+
+          return;
         }
       }
     });

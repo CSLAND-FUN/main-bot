@@ -3,37 +3,46 @@ import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
 import { Message } from "discord.js";
 
-import config from "@cfg";
+import config from "../../config.json";
 
-export = class StatsCommand extends Command {
+const GROUPS = {
+  1: "Игрок",
+  2: "Модератор",
+  3: "Тех. Поддержка",
+  4: "Мл. Администратор",
+  5: "Ст. Администратор",
+  6: "Скриптер",
+  7: "Гл. Администратор",
+  8: "Руководитель",
+};
+
+export = class InfoCommand extends Command {
   constructor() {
     super({
       category: CommandCategory.BONUSES,
-      name: "stats",
+      name: "info",
 
-      description: "Показывает вашу статистику в Бонусной Системе.",
-      aliases: ["bonuses"],
+      description: "Выводит вашу информацию.",
     });
   }
 
   async run(client: DiscordBot, message: Message, args: string[]) {
-    const data = await client.bonuses.data(message.author.id);
-    const word = Functions.declOfNum(data.bonuses, [
-      "бонус",
-      "бонуса",
-      "бонусов",
-    ]);
+    const { id, bonuses, blacklisted, reason, group } =
+      await client.bonuses.data(message.author.id);
 
+    const word = Functions.declOfNum(bonuses, ["бонус", "бонуса", "бонусов"]);
     const res = [];
-    res.push(`› **Баланс**: **${data.bonuses.toLocaleString("be")} ${word}**`);
+
     res.push(
-      `› **Купленные роли**: **${await this.getRoles(client, data.id)}**`
+      `› **Баланс**: **${bonuses.toLocaleString("be")} ${word}**`,
+      `› **Ваша группа**: **${GROUPS[group]}**`,
+      `› **Купленные роли**: **${await this.getRoles(client, id)}**`
     );
 
-    if (data.blacklisted === 1) {
+    if (blacklisted === 1) {
       res.push("");
       res.push("⚠️ | **Вы внесены в чёрный список бонусной системы!**");
-      res.push(`**Причина: ${data.reason}**`);
+      res.push(`**Причина: ${reason}**`);
     }
 
     const embed = this.embed(
