@@ -1,0 +1,53 @@
+import { Command, CommandCategory } from "@src/classes/Command";
+import DiscordBot from "@src/classes/Discord";
+import { bold, Message, TextChannel } from "discord.js";
+
+export = class ClearCommand extends Command {
+  constructor() {
+    super({
+      category: CommandCategory.MODERATION,
+      name: "clear",
+
+      description: "Очищает сообщения в канале.",
+      permissions: ["ManageMessages"],
+    });
+  }
+
+  async run(client: DiscordBot, message: Message, args: string[]) {
+    const amount = args[0];
+    if (!amount || !Number(amount) || (amount as unknown as number) > 100) {
+      const embed = this.embed(
+        client,
+        message,
+        "Red",
+        "user",
+        bold("❌ | Укажите количество сообщений (число до 100)!")
+      );
+
+      return message.reply({
+        embeds: [embed],
+      });
+    }
+
+    await (message.channel as TextChannel).bulkDelete(
+      amount as unknown as number,
+      true
+    );
+
+    const embed = this.embed(
+      client,
+      message,
+      "DarkPurple",
+      "user",
+      bold("❌ | Чат был очищен!")
+    );
+
+    const msg = await message.reply({
+      embeds: [embed],
+    });
+
+    setTimeout(async () => {
+      await msg.delete();
+    }, 2000);
+  }
+};
