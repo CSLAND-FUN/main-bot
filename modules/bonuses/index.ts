@@ -217,7 +217,7 @@ export class BonusSystem {
           id: id,
 
           bonuses: 0,
-          roles: null,
+          roles: "",
 
           counting: 0,
           blacklisted: 0,
