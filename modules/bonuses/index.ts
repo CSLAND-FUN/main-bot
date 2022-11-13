@@ -1,9 +1,14 @@
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
-import { Channel, Collection, Message, VoiceBasedChannel } from "discord.js";
+import {
+  Collection,
+  GuildMember,
+  Message,
+  VoiceBasedChannel,
+} from "discord.js";
+import random from "random";
 
 import { cancelJob, Job, scheduleJob } from "node-schedule";
-import random from "random";
 
 import Knex from "knex";
 import config from "../../src/config.json";
@@ -47,15 +52,56 @@ export enum HistoryType {
 export class BonusSystem {
   public client: DiscordBot;
   public knex: typeof knex;
+
   public cache: Collection<string, string[]>;
+  public jobs: Collection<string, Job>;
 
   constructor(client: DiscordBot) {
     this.client = client;
     this.knex = knex;
-    this.cache = new Collection();
 
-    this.handle_database();
+    this.cache = new Collection();
+    this.jobs = new Collection();
+
+    this.tables();
     this.checker();
+
+    scheduleJob("*/5 * * * *", async () => {
+      const all = await this.all();
+      const filtered = all.filter((u) => u.counting === 1);
+
+      const guild = this.client.guilds.cache.get(config.SERVER_ID);
+      for (const user of filtered) {
+        var member: GuildMember;
+        try {
+          member = await guild.members.fetch(user.id);
+        } catch (error) {
+          await this.update(user.id, "counting", 0);
+
+          const job = this.jobs.get(user.id);
+          if (job) {
+            cancelJob(job);
+            this.jobs.delete(user.id);
+          }
+
+          return;
+        }
+
+        const data = await this.data(user.id);
+        if (!member.voice.channel && data.counting === 1) {
+          await this.update(user.id, "counting", 0);
+
+          const job = this.jobs.get(user.id);
+          if (job) {
+            cancelJob(job);
+            this.jobs.delete(user.id);
+          }
+
+          return;
+        }
+      }
+    });
+
     this.handle();
   }
 
@@ -64,69 +110,39 @@ export class BonusSystem {
     await this.update(id, "counting", 1);
 
     const job: Job = scheduleJob("*/5 * * * *", async () => {
-      var newChannel: Channel;
+      var member: GuildMember;
       try {
-        newChannel = await this.client.channels.fetch(channel.id);
+        member = await channel.guild.members.fetch(id);
       } catch (error) {
-        const cached = this.cache.get(channel.id);
-        if (!cached) return cancelJob(job);
+        await this.update(id, "counting", 0);
 
-        for (const cached_id of cached) {
-          const data = await this.data(cached_id);
-          if (data.counting) await this.update(cached_id, "counting", 0);
+        cancelJob(job);
+        this.jobs.has(id) && this.jobs.delete(id);
 
-          console.log(
-            `[Bonus System] Canceled job for ${cached_id} due to channel is deleted.`
-          );
-        }
-
-        return cancelJob(job);
+        return;
       }
 
-      if (!newChannel.isVoiceBased()) return cancelJob(job);
+      const data = await this.data(member.id);
+      if (data.counting === 0) {
+        cancelJob(job);
+        this.jobs.has(id) && this.jobs.delete(id);
 
-      const newData = await this.data(id);
-      const members = newChannel.members.filter(async (m) => {
-        const data = await this.data(m.id);
-        return !m.user.bot || data.blacklisted !== 1;
-      });
-
-      if (members.size < 2) {
-        for (const [, member] of members) {
-          const _members = [];
-          if (newData.counting === 1) {
-            await this.update(member.id, "counting", 0);
-          }
-
-          _members.push(member.id);
-          console.log(
-            `[Bonus System] Stopped counting for ${_members.join(", ")}.`
-          );
-        }
-
-        return cancelJob(job);
+        return;
       }
 
-      const users = await this.all();
-      for (const u of users) {
-        if (u.counting !== 1) continue;
+      if (!member.voice.channel && data.counting === 1) {
+        await this.update(member.id, "counting", 0);
 
-        const member = newChannel.guild.members.cache.get(u.id);
-        if (!member.voice.channel) {
-          await this.update(u.id, "counting", 0);
-        }
+        cancelJob(job);
+        this.jobs.has(id) && this.jobs.delete(id);
+
+        return;
       }
 
-      const _new_data = await this.data(newData.id);
-      if (_new_data.counting === 1) {
-        await this.update(
-          newData.id,
-          "bonuses",
-          newData.bonuses + random.int(2, 7)
-        );
-      }
+      await this.update(id, "bonuses", data.bonuses + random.int(2, 7));
     });
 
+    if (!this.jobs.has(id)) this.jobs.set(id, job);
     return true;
   }
 
@@ -325,37 +341,19 @@ export class BonusSystem {
         });
 
         if (members.size >= 2) {
-          var _members = [];
-          var ids = [];
-
           for (const [, member] of members) {
             const data = await this.data(member.id);
             if (data.counting === 1) continue;
 
-            _members.push(member.user.tag);
-            ids.push(member.id);
-
             await this.startCount(member.id, newState.channel);
-          }
-
-          if (ids.length) {
-            this.cache.set(newState.channel.id, ids);
-            ids = [];
-          }
-
-          if (_members.length) {
-            console.log(
-              `[Bonus System] Starting Count for ${_members.join(", ")}...`
-            );
-
-            _members = [];
+            console.log(`[Bonus System] Started job for ${member.user.tag}`);
           }
         }
       }
     });
   }
 
-  private async handle_database() {
+  private async tables() {
     var bonuses_table = "bonus_users";
     const bonuses_table_check = await this.knex.schema.hasTable(bonuses_table);
     if (!bonuses_table_check) {
