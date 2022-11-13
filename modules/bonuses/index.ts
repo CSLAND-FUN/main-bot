@@ -272,12 +272,7 @@ export class BonusSystem {
   }
 
   async createHistoryItem(id: string, item: UserHistoryItem): Promise<boolean> {
-    const all = await await this.knex<UserHistoryItem>("bonus_users_history")
-      .select()
-      .finally();
-
     await this.knex<UserHistoryItem>("bonus_users_history").insert({
-      id: all.length + 1,
       ...item,
     });
 
