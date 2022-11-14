@@ -1,6 +1,7 @@
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
 import {
+  Channel,
   Collection,
   GuildMember,
   Message,
@@ -18,7 +19,7 @@ const knex = Knex({
     host: config.DATABASE.HOST,
     user: config.DATABASE.USER,
     password: config.DATABASE.PASS,
-    database: config.DATABASE.DATABASE,
+    database: "csland_test",
   },
 });
 
@@ -67,6 +68,7 @@ export class BonusSystem {
     this.tables();
     this.checker();
 
+    //? Check Database Users every 5 minutes.
     scheduleJob("*/5 * * * *", async () => {
       const all = await this.all();
       const filtered = all.filter((u) => u.counting === 1);
@@ -96,6 +98,42 @@ export class BonusSystem {
           if (job) {
             cancelJob(job);
             this.jobs.delete(user.id);
+          }
+
+          return;
+        }
+      }
+    });
+
+    //? Check Jobs every minute.
+    scheduleJob("*/1 * * * *", async () => {
+      const _all = this.jobs.keys();
+      const guild = this.client.guilds.cache.get(config.SERVER_ID);
+
+      for (const user of _all) {
+        var member: GuildMember;
+        try {
+          member = await guild.members.fetch(user);
+        } catch (error) {
+          await this.update(user, "counting", 0);
+
+          const job = this.jobs.get(user);
+          if (job) {
+            cancelJob(job);
+            this.jobs.delete(user);
+          }
+
+          return;
+        }
+
+        const data = await this.data(user);
+        if (!member.voice.channel && data.counting === 1) {
+          await this.update(user, "counting", 0);
+
+          const job = this.jobs.get(user);
+          if (job) {
+            cancelJob(job);
+            this.jobs.delete(user);
           }
 
           return;
@@ -328,6 +366,13 @@ export class BonusSystem {
 
     this.client.on("voiceStateUpdate", async (oldState, newState) => {
       if (oldState.member.user.bot || newState.member.user.bot) return;
+      if (
+        oldState.guild.id !== config.SERVER_ID ||
+        newState.guild.id !== config.SERVER_ID
+      ) {
+        return;
+      }
+
       await this.data(newState.member.id);
 
       if (!oldState.channel && newState.channel) {
@@ -351,7 +396,30 @@ export class BonusSystem {
           return !m.user.bot || data.blacklisted !== 1;
         });
 
-        const new_members = newState.channel.members.filter(async (m) => {
+        var new_channel: Channel;
+        try {
+          new_channel = await oldState.channel.fetch();
+        } catch (error) {
+          const members = oldState.channel.members.filter(async (m) => {
+            const data = await this.data(m.id);
+            return !m.user.bot || data.blacklisted !== 1;
+          });
+
+          for (const [, member] of members) {
+            const job = this.jobs.get(member.id);
+            if (!job) continue;
+
+            const data = await this.data(member.id);
+            if (data.counting === 0) continue;
+
+            await this.update(member.id, "counting", 0);
+            cancelJob(job);
+          }
+
+          return;
+        }
+
+        const new_members = new_channel.members.filter(async (m) => {
           const data = await this.data(m.id);
           return !m.user.bot || data.blacklisted !== 1;
         });
@@ -388,7 +456,7 @@ export class BonusSystem {
     if (!bonuses_table_check) {
       await this.knex.schema.createTable("bonus_users", (table) => {
         table.string("id", 50).notNullable();
-        table.integer("role", 1).notNullable().defaultTo(1);
+        table.integer("group", 1).notNullable().defaultTo(1);
 
         table.integer("bonuses", 255).notNullable().defaultTo(0);
         table.string("roles", 3).notNullable().defaultTo("");

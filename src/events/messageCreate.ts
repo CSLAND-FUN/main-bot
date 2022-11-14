@@ -10,38 +10,29 @@ export = class MessageCreateEvent extends Event {
 
   async run(client: DiscordBot, message: Message) {
     if (!message.inGuild() || message.author.bot) return;
-    if (!message.content.startsWith("!!!")) return;
+    if (!message.content.startsWith("!")) return;
 
-    const args = message.content.slice("!!!".length).trim().split(" ");
+    const args = message.content.slice("!".length).trim().split(" ");
     const cmd = args.shift().toLowerCase();
 
     // prettier-ignore
     const command = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
     if (!command) {
-      const msg = await message.react("❌");
-      setTimeout(async () => {
-        await msg.message.delete();
-      }, 2000);
+      return await message.react("❌");
     }
 
     if (
       command.data.ownerOnly === true &&
       !config.OWNERS.includes(message.author.id)
     ) {
-      const msg = await message.react("❌");
-      setTimeout(async () => {
-        await msg.message.delete();
-      }, 2000);
+      return await message.react("❌");
     }
 
     if (
       command.data.permissions &&
       !message.member.permissions.has(command.data.permissions)
     ) {
-      const msg = await message.react("❌");
-      setTimeout(async () => {
-        await msg.message.delete();
-      }, 2000);
+      return await message.react("❌");
     }
 
     await command.run(client, message, args);
