@@ -13,7 +13,7 @@ export = class GuildMemberAddEvent extends Event {
 
     await client.bonuses.data(member.id);
 
-    const channel = member.guild.channels.cache.get(member.guild.id);
+    const channel = member.guild.channels.cache.get("937777349477404703");
     if (!channel.isTextBased()) return;
 
     const out = [

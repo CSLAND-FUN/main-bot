@@ -57,7 +57,7 @@ export class BonusSystem {
 
   public cache: Collection<string, string[]>;
   public jobs: Collection<string, Job>;
-  public users: Record<string, GuildMember[]>;
+  public users: Collection<string, GuildMember[]>;
 
   constructor(client: DiscordBot) {
     this.client = client;
@@ -65,7 +65,7 @@ export class BonusSystem {
 
     this.cache = new Collection();
     this.jobs = new Collection();
-    this.users = {};
+    this.users = new Collection();
 
     this.tables();
     this.checker();
@@ -393,11 +393,19 @@ export class BonusSystem {
             await this.startCount(member.id, newState.channel);
             console.log(`[Bonuses] Started job for ${member.user.tag}`);
 
-            const users = this.users[newState.channel.id];
-            if (!users.find((x) => x.id === member.id)) {
+            const users = this.users.get(newState.channel.id);
+            if (!users) {
+              this.users.set(newState.channel.id, []);
+
               //? Пополняем список пользователей.
+              const new_users = this.users.get(newState.channel.id);
+              new_users.push(member);
+              this.users.set(newState.channel.id, new_users);
+            } else if (users && !users.find((x) => x.id === member.id)) {
+              //? Пополняем список пользователей.
+              const users = this.users.get(newState.channel.id);
               users.push(member);
-              this.users[newState.channel.id] = users;
+              this.users.set(newState.channel.id, users);
             }
           }
         }
@@ -414,7 +422,7 @@ export class BonusSystem {
         } catch (e) {
           old_members = new Collection();
 
-          const users = this.users[oldState.channel.id];
+          const users = this.users.get(oldState.channel.id);
           if (users.length) {
             //? Пополняем коллекцию прошлых пользователей.
             for (const user of users) {
@@ -440,7 +448,7 @@ export class BonusSystem {
             await this.update(member.id, "counting", 0);
             cancelJob(job);
 
-            this.users[oldState.channel.id] = [];
+            this.users.delete(oldState.channel.id);
           }
 
           return;
@@ -478,7 +486,7 @@ export class BonusSystem {
             cancelJob(job);
           }
 
-          this.users[channel.id] = [];
+          this.users.delete(channel.id);
           return;
         }
       }
