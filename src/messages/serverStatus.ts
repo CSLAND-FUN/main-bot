@@ -13,7 +13,7 @@ export default async function serverStatus(client: DiscordBot) {
   embed.setColor("DarkPurple");
   embed.setAuthor({
     name: "CSLAND | Статус серверов",
-    iconURL: client.user.avatarURL({ size: 2048 }),
+    iconURL: client.user.avatarURL({ size: 2048, forceStatic: true }),
   });
   embed.setDescription("**— Статус серверов —**");
 
@@ -47,11 +47,11 @@ async function editMessage(embed: EmbedBuilder, msg: Message) {
   }
 
   const max_online = 90;
-  const percent = Math.floor((100 * online) / max_online) + "% из 100%";
+  const percent = Math.floor((100 * online) / max_online) + "/100%";
 
   embed.data.description += [
     "\n",
-    `**Общий онлайн на серверах**: **${percent}**`,
+    `**Общий онлайн на серверах**: **${online}/90 | ${percent}**`,
   ].join("\n");
 
   await msg.edit({

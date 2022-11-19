@@ -114,7 +114,7 @@ export = class ShopCommand extends Command {
           );
 
           message.member.roles.add("939139061812174908");
-          await client.bonuses.createHistoryItem(data.id, {
+          await client.bonuses.createHistoryItem({
             type: HistoryType.BONUS,
 
             user_id: message.author.id,
@@ -178,7 +178,7 @@ export = class ShopCommand extends Command {
           );
 
           message.member.roles.add("939139424200052816");
-          await client.bonuses.createHistoryItem(data.id, {
+          await client.bonuses.createHistoryItem({
             type: HistoryType.BONUS,
 
             user_id: message.author.id,
@@ -242,7 +242,7 @@ export = class ShopCommand extends Command {
           );
 
           message.member.roles.add("939139723560120353");
-          await client.bonuses.createHistoryItem(data.id, {
+          await client.bonuses.createHistoryItem({
             type: HistoryType.BONUS,
 
             user_id: message.author.id,

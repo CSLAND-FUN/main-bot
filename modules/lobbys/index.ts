@@ -41,7 +41,7 @@ export class LobbysSystem {
     this.handle();
 
     scheduleJob("*/5 * * * *", async () => {
-      console.log("[Lobby System] Cleaning up cache...");
+      console.log("[Lobbys] Cleaning up cache...");
 
       if (!this.cache.size) {
         return null;
@@ -249,20 +249,24 @@ export class LobbysSystem {
   private handle() {
     if (!this.cache) this.cache = new Collection();
 
-    console.log(
-      "[Lobby System] Creating Handler for Client#voiceStateUpdate Event...\n"
-    );
-
+    console.log("[Lobbys] Creating Handler for Client#voiceStateUpdate Event");
     this.client.on("voiceStateUpdate", async (oldState, newState) => {
-      if (!oldState.channel && newState.channel) {
-        if (newState.channel.parent.id === this.category_id) {
-          if (newState.channel.id === this.parent_id) {
-            const channel = await newState.guild.channels.create({
-              name: this.channel_name(newState.member.user.tag),
-              type: ChannelType.GuildVoice,
-              parent: this.category_id,
-            });
+      var joined = !oldState.channel === null && newState.channel !== null;
+      var left = oldState.channel !== null && newState.channel === null;
+      var switched = oldState.channel !== null && newState.channel !== null;
 
+      if (joined) {
+        var category = newState.channel.parent.id === this.category_id;
+        var parent = newState.channel.id === this.parent_id;
+
+        if (category) {
+          if (parent) {
+            const cached = this.cache.find((x) => {
+              return x.owner === newState.member.id;
+            });
+            if (cached) return;
+
+            const channel = await this.createChannel(newState);
             this.cache.set(channel.id, {
               id: channel.id,
               owner: newState.member.id,
@@ -284,17 +288,20 @@ export class LobbysSystem {
             }
           }
         }
-      } else if (oldState.channel && !newState.channel) {
+      } else if (left) {
         await this.check_and_delete(oldState, newState);
-      } else if (oldState.channel && newState.channel) {
-        if (newState.channel.parent.id === this.category_id) {
-          if (newState.channel.id === this.parent_id) {
-            const channel = await newState.guild.channels.create({
-              name: this.channel_name(newState.member.user.tag),
-              type: ChannelType.GuildVoice,
-              parent: this.category_id,
-            });
+      } else if (switched) {
+        var category = newState.channel.parent.id === this.category_id;
+        var parent = newState.channel.id === this.parent_id;
 
+        if (category) {
+          if (parent) {
+            const cached = this.cache.find((x) => {
+              return x.owner === newState.member.id;
+            });
+            if (cached) return;
+
+            const channel = await this.createChannel(newState);
             this.cache.set(channel.id, {
               id: channel.id,
               owner: newState.member.id,
@@ -315,10 +322,16 @@ export class LobbysSystem {
               await channel.delete();
             }
           }
-        } else {
-          await this.check_and_delete(oldState, newState);
         }
       }
+    });
+  }
+
+  async createChannel(state: VoiceState) {
+    return state.guild.channels.create({
+      name: this.channel_name(state.member.user.tag),
+      type: ChannelType.GuildVoice,
+      parent: this.category_id,
     });
   }
 

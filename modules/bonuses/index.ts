@@ -19,7 +19,7 @@ const knex = Knex({
     host: config.DATABASE.HOST,
     user: config.DATABASE.USER,
     password: config.DATABASE.PASS,
-    database: "csland_test",
+    database: "csland_main",
   },
 });
 
@@ -57,6 +57,7 @@ export class BonusSystem {
 
   public cache: Collection<string, string[]>;
   public jobs: Collection<string, Job>;
+  public users: Record<string, GuildMember[]>;
 
   constructor(client: DiscordBot) {
     this.client = client;
@@ -64,9 +65,11 @@ export class BonusSystem {
 
     this.cache = new Collection();
     this.jobs = new Collection();
+    this.users = {};
 
     this.tables();
     this.checker();
+    this.handle();
 
     //? Check Database Users every 5 minutes.
     scheduleJob("*/5 * * * *", async () => {
@@ -140,8 +143,6 @@ export class BonusSystem {
         }
       }
     });
-
-    this.handle();
   }
 
   async startCount(id: string, channel: VoiceBasedChannel) {
@@ -310,7 +311,7 @@ export class BonusSystem {
     return true;
   }
 
-  async createHistoryItem(id: string, item: UserHistoryItem): Promise<boolean> {
+  async createHistoryItem(item: UserHistoryItem): Promise<boolean> {
     await this.knex<UserHistoryItem>("bonus_users_history").insert({
       ...item,
     });
@@ -360,10 +361,7 @@ export class BonusSystem {
   }
 
   private handle() {
-    console.log(
-      "[Bonus System] Creating Handler for Client#voiceStateUpdate Event..."
-    );
-
+    console.log("[Bonuses] Creating Handler for Client#voiceStateUpdate Event");
     this.client.on("voiceStateUpdate", async (oldState, newState) => {
       if (oldState.member.user.bot || newState.member.user.bot) return;
       if (
@@ -373,59 +371,95 @@ export class BonusSystem {
         return;
       }
 
+      //? Создаём строку в базе если пользователя не существует в ней.
       await this.data(newState.member.id);
 
+      //? Если пользователь зашёл в канал.
       if (!oldState.channel && newState.channel) {
         const members = newState.channel.members.filter(async (m) => {
           const data = await this.data(m.id);
           return !m.user.bot || data.blacklisted !== 1;
         });
 
+        //? Если число больше или равно двум.
         if (members.size >= 2) {
           for (const [, member] of members) {
             const data = await this.data(member.id);
             if (data.counting === 1) continue;
 
+            const job = this.jobs.has(member.id);
+            if (job) continue;
+
             await this.startCount(member.id, newState.channel);
-            console.log(`[Bonus System] Started job for ${member.user.tag}`);
+            console.log(`[Bonuses] Started job for ${member.user.tag}`);
+
+            const users = this.users[newState.channel.id];
+            if (!users.find((x) => x.id === member.id)) {
+              //? Пополняем список пользователей.
+              users.push(member);
+              this.users[newState.channel.id] = users;
+            }
           }
         }
-      } else if (oldState.channel && !newState.channel) {
-        const old_members = oldState.channel.members.filter(async (m) => {
-          const data = await this.data(m.id);
-          return !m.user.bot || data.blacklisted !== 1;
-        });
+      }
+      //? Если пользователь вышел с канала.
+      else if (oldState.channel && !newState.channel) {
+        var old_members: Collection<string, GuildMember>;
 
-        var new_channel: Channel;
         try {
-          new_channel = await oldState.channel.fetch();
-        } catch (error) {
-          const members = oldState.channel.members.filter(async (m) => {
+          old_members = oldState.channel.members.filter(async (m) => {
             const data = await this.data(m.id);
             return !m.user.bot || data.blacklisted !== 1;
           });
+        } catch (e) {
+          old_members = new Collection();
 
-          for (const [, member] of members) {
+          const users = this.users[oldState.channel.id];
+          if (users.length) {
+            //? Пополняем коллекцию прошлых пользователей.
+            for (const user of users) {
+              old_members.set(user.id, user);
+            }
+          }
+        }
+
+        var channel: Channel;
+
+        try {
+          channel = await newState.guild.channels.cache.get(
+            oldState.channel.id
+          );
+        } catch (e) {
+          for (const [, member] of old_members) {
+            const data = await this.data(member.id);
+            if (data.counting !== 1) continue;
+
             const job = this.jobs.get(member.id);
             if (!job) continue;
 
-            const data = await this.data(member.id);
-            if (data.counting === 0) continue;
-
             await this.update(member.id, "counting", 0);
             cancelJob(job);
+
+            this.users[oldState.channel.id] = [];
           }
 
           return;
         }
 
-        const new_members = new_channel.members.filter(async (m) => {
+        if (!channel.isVoiceBased()) return;
+
+        const members = channel.members.filter(async (m) => {
           const data = await this.data(m.id);
           return !m.user.bot || data.blacklisted !== 1;
         });
 
-        if (old_members.size >= 2 && new_members.size < 2) {
-          for (const [, member] of new_members) {
+        //? Проверяем количество участников в ГС.
+        //? Если меньше двух, то заканчиваем работу участников.
+        if (old_members.size >= 2 && members.size < 2) {
+          for (const [, member] of members) {
+            const data = await this.data(member.id);
+            if (data.counting !== 1) continue;
+
             const job = this.jobs.get(member.id);
             if (!job) continue;
 
@@ -434,16 +468,17 @@ export class BonusSystem {
           }
 
           for (const [, member] of old_members) {
+            const data = await this.data(member.id);
+            if (data.counting !== 1) continue;
+
             const job = this.jobs.get(member.id);
             if (!job) continue;
-
-            const data = await this.data(member.id);
-            if (data.counting === 0) continue;
 
             await this.update(member.id, "counting", 0);
             cancelJob(job);
           }
 
+          this.users[channel.id] = [];
           return;
         }
       }
@@ -503,9 +538,7 @@ export class BonusSystem {
       if (data.counting !== 1) continue;
 
       await this.update(id, "counting", 0);
-      console.log(
-        `[Bonus System] Stopped counting for ${id} due to bot restart.`
-      );
+      console.log(`[Bonuses] Stopped counting for ${id} due to bot restart.`);
     }
   }
 }

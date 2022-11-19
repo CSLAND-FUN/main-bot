@@ -39,11 +39,14 @@ export class Command {
         author === "bot"
           ? {
               name: client.user.tag,
-              iconURL: client.user.avatarURL(),
+              iconURL: client.user.avatarURL({ size: 2048, forceStatic: true }),
             }
           : {
               name: message.author.tag,
-              iconURL: message.author.avatarURL(),
+              iconURL: message.author.avatarURL({
+                size: 2048,
+                forceStatic: true,
+              }),
             }
       )
       .setDescription(content);

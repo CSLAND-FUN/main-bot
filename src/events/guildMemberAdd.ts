@@ -32,7 +32,7 @@ export = class GuildMemberAddEvent extends Event {
     embed.setColor("DarkPurple");
     embed.setAuthor({
       name: member.user.tag,
-      iconURL: member.avatarURL(),
+      iconURL: member.avatarURL({ size: 2048, forceStatic: true }),
     });
     embed.setDescription(out);
 

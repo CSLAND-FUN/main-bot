@@ -40,7 +40,7 @@ export = class HistoryCommand extends Command {
     embed.setTitle("История покупок");
     embed.setAuthor({
       name: message.author.tag,
-      iconURL: message.author.avatarURL(),
+      iconURL: message.author.avatarURL({ size: 2048, forceStatic: true }),
     });
 
     for (const entry of data) {
