@@ -104,6 +104,20 @@ export class BonusSystem {
           }
 
           return;
+        } else if (
+          member.voice.channel &&
+          member.voice.channel.members.size < 2 &&
+          data.counting === 1
+        ) {
+          await this.update(user.id, "counting", 0);
+
+          const job = this.jobs.get(user.id);
+          if (job) {
+            cancelJob(job);
+            this.jobs.delete(user.id);
+          }
+
+          return;
         }
       }
     });
