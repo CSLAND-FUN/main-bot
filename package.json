@@ -18,7 +18,8 @@
     "module-alias": "^2.2.2",
     "mysql": "^2.18.1",
     "node-schedule": "^2.1.0",
-    "random": "^3.0.6"
+    "random": "^3.0.6",
+    "undici": "^5.13.0"
   },
   "devDependencies": {
     "@types/gamedig": "^4.0.0",

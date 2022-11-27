@@ -38,6 +38,7 @@ async function editMessage(embed: EmbedBuilder, msg: Message) {
     embed.data.description += [
       "\n",
       `› **${server.server} | ${display_ip}:**`,
+      `› **steam://connect/${display_ip}**`,
       `› **Статус**: **\`${server.status}\`**`,
       `› **Карта**: **\`${server.map}\`**`,
       `› **Игроков**: **\`${server.players}\`**`,

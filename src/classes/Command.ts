@@ -31,7 +31,8 @@ export class Command {
     message: Message,
     color: ColorResolvable,
     author: "bot" | "user",
-    content: string
+    content: string,
+    emoji?: string
   ) {
     return new EmbedBuilder()
       .setColor(color)
@@ -49,6 +50,8 @@ export class Command {
               }),
             }
       )
-      .setDescription(content);
+      .setDescription(
+        typeof emoji !== "undefined" ? `${emoji} | ${content}` : content
+      );
   }
 }

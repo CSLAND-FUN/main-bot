@@ -19,7 +19,7 @@ const knex = Knex({
     host: config.DATABASE.HOST,
     user: config.DATABASE.USER,
     password: config.DATABASE.PASS,
-    database: "csland_main",
+    database: config.DATABASE.DATABASE,
   },
 });
 
@@ -33,6 +33,8 @@ export interface BonusUser {
   counting: 0 | 1;
   blacklisted: 0 | 1;
   reason: string;
+
+  bonus_used: string;
 }
 
 export interface UserHistoryItem {
@@ -276,6 +278,8 @@ export class BonusSystem {
           counting: 0,
           blacklisted: 0,
           reason: null,
+
+          bonus_used: null,
         })
         .finally();
 
