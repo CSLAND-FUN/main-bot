@@ -35,6 +35,7 @@ export interface BonusUser {
   reason: string;
 
   bonus_used: string;
+  newyear_used: string;
 }
 
 export interface UserHistoryItem {
@@ -271,6 +272,7 @@ export class BonusSystem {
       await this.knex<BonusUser>("bonus_users")
         .insert({
           id: id,
+          group: 1,
 
           bonuses: 0,
           roles: "",
@@ -280,6 +282,7 @@ export class BonusSystem {
           reason: null,
 
           bonus_used: null,
+          newyear_used: null,
         })
         .finally();
 

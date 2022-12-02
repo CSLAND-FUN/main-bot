@@ -289,37 +289,37 @@ export = class ShopCommand extends Command {
 
     if (role_num === 1) {
       return {
-        cost: 3000,
-        string: "3000 бонусов",
+        cost: 5000,
+        string: "5000 бонусов",
       };
     } else if (role_num === 2) {
       if (data.roles.includes("1")) {
         return {
-          cost: 5000,
-          string: "5000 бонусов",
+          cost: 7000,
+          string: "7000 бонусов",
         };
       }
 
       return {
-        cost: 8000,
-        string: "8000 бонусов",
+        cost: 10000,
+        string: "10000 бонусов",
       };
     } else if (role_num === 3) {
       if (data.roles.includes("2")) {
         return {
-          cost: 5000,
-          string: "5000 бонусов",
+          cost: 7000,
+          string: "7000 бонусов",
         };
       } else if (data.roles.includes("1")) {
         return {
-          cost: 10000,
-          string: "10000 бонусов",
+          cost: 12000,
+          string: "12000 бонусов",
         };
       }
 
       return {
-        cost: 13000,
-        string: "13000 бонусов",
+        cost: 15000,
+        string: "15000 бонусов",
       };
     }
   }

@@ -3,7 +3,7 @@ import DiscordBot from "@src/classes/Discord";
 import { bold, EmbedBuilder, Message } from "discord.js";
 
 import { FormData, request } from "undici";
-const BASE_URL = "https://csland.fun/ajax/api/index.php";
+import { BASE_URL } from "../../config.json";
 
 export = class HelpCommand extends Command {
   constructor() {
@@ -23,7 +23,7 @@ export = class HelpCommand extends Command {
         message,
         "Red",
         "user",
-        bold("Укажите ID пользователя!"),
+        bold("Укажите ID пользователя с сайта!"),
         "❌"
       );
 
