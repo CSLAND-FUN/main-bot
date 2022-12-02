@@ -5,7 +5,7 @@ import { bold, EmbedBuilder, Message } from "discord.js";
 import { FormData, request } from "undici";
 import { BASE_URL } from "../../config.json";
 
-export = class HelpCommand extends Command {
+export = class ProfileCommand extends Command {
   constructor() {
     super({
       category: CommandCategory.OTHER,
