@@ -16,10 +16,9 @@ export = class BonusCommand extends Command {
 
   async run(client: DiscordBot, message: Message, args: string[]) {
     const data = await client.bonuses.data(message.author.id);
-    const used_time = new Date(Number(data.bonus_used));
     const next_use = new Date(Number(data.bonus_used) + ms);
 
-    if (data.bonus_used !== null && next_use.getTime() > used_time.getTime()) {
+    if (data.bonus_used !== null && Date.now() < next_use.getTime()) {
       const date = new Date(Number(data.bonus_used) + ms).toLocaleString("ru");
       const embed = this.embed(
         client,
@@ -52,7 +51,7 @@ export = class BonusCommand extends Command {
       message,
       "DarkPurple",
       "user",
-      bold(`Вы получили еженедельный бонус в размере 500 бонусов!`),
+      bold(`Вы получили еженедельный бонус в размере 250 бонусов!`),
       "🎉"
     );
 
