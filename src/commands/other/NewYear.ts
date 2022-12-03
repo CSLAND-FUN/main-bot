@@ -33,10 +33,10 @@ export = class NewYearCommand extends Command {
 
   async run(client: DiscordBot, message: Message, args: string[]) {
     const data = await client.bonuses.data(message.author.id);
-    if (
-      data.newyear_used !== null &&
-      Number(data.newyear_used) < Number(data.newyear_used) + ms
-    ) {
+    const used_time = new Date(Number(data.newyear_used));
+    const next_use = new Date(Number(data.newyear_used) + ms);
+
+    if (data.bonus_used !== null && next_use.getTime() > used_time.getTime()) {
       // prettier-ignore
       const date = new Date(Number(data.newyear_used) + ms).toLocaleString("ru");
       const embed = this.embed(
