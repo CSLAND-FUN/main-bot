@@ -16,7 +16,10 @@ export = class BonusCommand extends Command {
 
   async run(client: DiscordBot, message: Message, args: string[]) {
     const data = await client.bonuses.data(message.author.id);
-    if (data.bonus_used !== null && Number(data.bonus_used) < Date.now() + ms) {
+    if (
+      data.bonus_used !== null &&
+      Number(data.bonus_used) < Number(data.bonus_used) + ms
+    ) {
       const date = new Date(Number(data.bonus_used) + ms).toLocaleString("ru");
       const embed = this.embed(
         client,

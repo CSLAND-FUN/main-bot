@@ -35,7 +35,7 @@ export = class NewYearCommand extends Command {
     const data = await client.bonuses.data(message.author.id);
     if (
       data.newyear_used !== null &&
-      Number(data.newyear_used) < Date.now() + ms
+      Number(data.newyear_used) < Number(data.newyear_used) + ms
     ) {
       // prettier-ignore
       const date = new Date(Number(data.newyear_used) + ms).toLocaleString("ru");
