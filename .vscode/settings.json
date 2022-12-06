@@ -3,20 +3,5 @@
   "editor.formatOnSave": true,
   "editor.tabSize": 2,
   "window.title": "[${rootName}] ${activeEditorShort}",
-  "files.autoSave": "onWindowChange",
-  "sqltools.connections": [
-    {
-      "mysqlOptions": {
-        "authProtocol": "default"
-      },
-      "previewLimit": 50,
-      "server": "localhost",
-      "port": 3306,
-      "driver": "MySQL",
-      "name": "MySQL Local",
-      "database": "csland_test",
-      "username": "root",
-      "password": "cslandproject2022"
-    }
-  ]
+  "files.autoSave": "onWindowChange"
 }
