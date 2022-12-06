@@ -3,7 +3,8 @@ import DiscordBot from "@src/classes/Discord";
 import { bold, EmbedBuilder, Message } from "discord.js";
 
 import { FormData, request } from "undici";
-import { BASE_URL } from "../../config.json";
+import { BASE_URL } from "@src/config.json";
+import Functions from "@src/classes/Functions";
 
 export = class ProfileCommand extends Command {
   constructor() {
@@ -17,16 +18,21 @@ export = class ProfileCommand extends Command {
 
   async run(client: DiscordBot, message: Message, args: string[]) {
     const id = args[0];
-    if (!id || !Number(id)) {
+    if (!id) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
         bold("Укажите ID пользователя с сайта!"),
         "❌"
       );
 
+      return message.reply({
+        embeds: [embed],
+      });
+    }
+
+    const check = Functions.checkNumber(id, true);
+    if (typeof check !== "number") {
+      const embed = this.embed("Red", bold(check), "❌");
       return message.reply({
         embeds: [embed],
       });
@@ -44,15 +50,7 @@ export = class ProfileCommand extends Command {
     ).body.json();
 
     if (req.status === 2) {
-      const embed = this.embed(
-        client,
-        message,
-        "Red",
-        "user",
-        bold(req.message),
-        "❌"
-      );
-
+      const embed = this.embed("Red", bold(req.message), "❌");
       return message.reply({
         embeds: [embed],
       });
@@ -64,12 +62,6 @@ export = class ProfileCommand extends Command {
     const avatar = `https://csland.fun/${data.avatar}`;
 
     const embed = new EmbedBuilder();
-
-    embed.setAuthor({
-      name: message.author.tag,
-      iconURL: message.author.avatarURL({ forceStatic: true, size: 2048 }),
-    });
-
     embed.setColor("DarkPurple");
     embed.setThumbnail(avatar);
     embed.setTitle(data.login);

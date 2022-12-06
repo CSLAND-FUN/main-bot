@@ -15,14 +15,7 @@ export = class PayCommand extends Command {
   async run(client: DiscordBot, message: Message, args: string[]) {
     const member = message.mentions.members.first();
     if (!member) {
-      const embed = this.embed(
-        client,
-        message,
-        "Red",
-        "user",
-        bold("❌ | Укажите участника!")
-      );
-
+      const embed = this.embed("Red", bold("Укажите участника!"), "❌");
       return message.reply({
         embeds: [embed],
       });
@@ -30,11 +23,9 @@ export = class PayCommand extends Command {
 
     if (member.id === message.author.id) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Вы не можете передать бонусы самому себе!")
+        bold("Вы не можете передать бонусы самому себе!"),
+        "❌"
       );
 
       return message.reply({
@@ -42,11 +33,9 @@ export = class PayCommand extends Command {
       });
     } else if (member.user.bot) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Вы не можете передать бонусы боту!")
+        bold("Вы не можете передать бонусы боту!"),
+        "❌"
       );
 
       return message.reply({
@@ -56,25 +45,16 @@ export = class PayCommand extends Command {
 
     const result = await client.bonuses.transfer(message.author.id, member.id);
     if ("message" in result) {
-      const embed = this.embed(
-        client,
-        message,
-        "Red",
-        "user",
-        bold(`❌ | ${result.message!}`)
-      );
-
+      const embed = this.embed("Red", bold(result.message), "❌");
       return message.reply({
         embeds: [embed],
       });
     }
 
     const embed = this.embed(
-      client,
-      message,
       "DarkPurple",
-      "user",
-      bold(`✅ | Вы __ПОЛНОСТЬЮ__ передали ${member.toString()} свои бонусы!`)
+      bold(`Вы __ПОЛНОСТЬЮ__ передали ${member.toString()} свои бонусы!`),
+      "✅"
     );
 
     return message.reply({

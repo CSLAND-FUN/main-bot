@@ -10,14 +10,18 @@
   ? Подарок определяется путём случайного выбора.
 */
 
+import { bold, Message, TextChannel } from "discord.js";
 import { Command, CommandCategory } from "@src/classes/Command";
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
-import { bold, Message, TextChannel } from "discord.js";
 
-import random from "random";
 import { FormData, request } from "undici";
-import { BASE_URL, CHANNEL_ID, SECRET_TOKEN } from "../../config.json";
+import {
+  BASE_URL,
+  NOTIF_CHANNEL_ID,
+  OAUTH_SECRET_TOKEN,
+} from "@src/config.json";
+import random from "random";
 
 const ms = 86400000;
 
@@ -39,10 +43,7 @@ export = class NewYearCommand extends Command {
       // prettier-ignore
       const date = new Date(Number(data.newyear_used) + ms).toLocaleString("ru");
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
         bold(`Вы уже получили ежедневный новогодний бонус!\nЖдём вас ${date}`),
         "❌"
       );
@@ -81,17 +82,14 @@ export = class NewYearCommand extends Command {
           method: "POST",
 
           headers: {
-            TOKEN: SECRET_TOKEN,
+            TOKEN: OAUTH_SECRET_TOKEN,
           },
         })
       ).body.json();
 
       if (data.success === false) {
         const embed = this.embed(
-          client,
-          message,
           "Red",
-          "user",
           bold(
             `Произошла неизвестная ошибка, упомяните скриптера для решения проблемы!`
           ),
@@ -104,10 +102,7 @@ export = class NewYearCommand extends Command {
       }
 
       const embed = this.embed(
-        client,
-        message,
         "DarkPurple",
-        "user",
         bold(
           [
             `В качестве новогоднего подарка вы получили ${data.pretty_type}!`,
@@ -122,10 +117,7 @@ export = class NewYearCommand extends Command {
       });
 
       const to_user = this.embed(
-        client,
-        message,
         "DarkPurple",
-        "user",
         bold(
           [
             `Вот ваша награда - ${data.pretty_type}!`,
@@ -142,10 +134,7 @@ export = class NewYearCommand extends Command {
         });
       } catch (e) {
         const embed = this.embed(
-          client,
-          message,
           "Red",
-          "user",
           bold(
             `У меня не получилось отправить вам сообщение в ЛС, упомяните скриптера для получения подарка!`
           ),
@@ -159,23 +148,19 @@ export = class NewYearCommand extends Command {
       }
 
       const info_embed = this.embed(
-        client,
-        message,
         "DarkPurple",
-        "user",
         bold(
           [
             `› Пользователь: ${message.author.toString()}`,
             `› Тип: ${data.pretty_type}`,
-            `› Ключ: ||${data.key}||`,
+            `› Ключ: ||${data.key}|| (не трогать просто так)`,
             `› Сумма/Скидка: ${data.val}`,
           ].join("\n")
         )
       );
 
-      const channel = message.guild.channels.cache.get(
-        CHANNEL_ID
-      ) as TextChannel;
+      // prettier-ignore
+      const channel = message.guild.channels.cache.get(NOTIF_CHANNEL_ID) as TextChannel;
 
       channel.send({
         embeds: [info_embed],
@@ -198,10 +183,7 @@ export = class NewYearCommand extends Command {
 
     const word = Functions.declOfNum(pick, ["бонус", "бонуса", "бонусов"]);
     const embed = this.embed(
-      client,
-      message,
       "DarkPurple",
-      "user",
       bold(`В качестве новогоднего подарка вы получили ${pick} ${word}!`),
       "🎁"
     );

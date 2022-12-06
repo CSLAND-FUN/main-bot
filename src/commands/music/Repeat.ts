@@ -16,11 +16,9 @@ export = class RepeatCommand extends Command {
   async run(client: DiscordBot, message: Message, args: string[]) {
     if (!message.member.voice.channel) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Войдите в голосовой канал чтобы продолжить!")
+        bold("Войдите в голосовой канал чтобы продолжить!"),
+        "❌"
       );
 
       return message.reply({
@@ -31,11 +29,9 @@ export = class RepeatCommand extends Command {
     const queue = client.player.getQueue(message);
     if (!queue) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | На сервере не проигрывает музыка!")
+        bold("На сервере не проигрывает музыка!"),
+        "❌"
       );
 
       return message.reply({
@@ -79,7 +75,7 @@ export = class RepeatCommand extends Command {
         : `Режим повтора поставлен на ${song_underscore}!\n\nЧтобы выключить, введите \`!repeat off\`\nЧтобы поставить режим повтора очереди, введите \`!repeat queue\``
       : "Режим повтора отключён!";
 
-    const embed = this.embed(client, message, "DarkPurple", "user", bold(text));
+    const embed = this.embed("DarkPurple", bold(text));
     return message.reply({
       embeds: [embed],
     });

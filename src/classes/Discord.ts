@@ -1,11 +1,13 @@
 import { ActivityType, Client, Collection } from "discord.js";
-import { DisTube, StreamType } from "distube";
-import config from "../config.json";
 import Handler from "./Handler";
+import config from "../config.json";
 
-import { SpotifyPlugin } from "@distube/spotify";
 import { BonusSystem } from "@modules/bonuses";
 import { LobbysSystem } from "@modules/lobbys";
+
+import { DisTube, StreamType } from "distube";
+import { SpotifyPlugin } from "@distube/spotify";
+import { DeezerPlugin } from "@distube/deezer";
 
 export = class DiscordBot extends Client {
   constructor() {
@@ -27,8 +29,7 @@ export = class DiscordBot extends Client {
         activities: [
           {
             type: ActivityType.Competing,
-            name: "csland.fun",
-            url: "https://csland.fun/",
+            name: "",
           },
         ],
       },
@@ -44,7 +45,7 @@ export = class DiscordBot extends Client {
     this.player = new DisTube(this, {
       emptyCooldown: 15000,
       joinNewVoiceChannel: false,
-      plugins: [new SpotifyPlugin()],
+      plugins: [new SpotifyPlugin(), new DeezerPlugin()],
 
       searchSongs: 5,
       leaveOnStop: true,

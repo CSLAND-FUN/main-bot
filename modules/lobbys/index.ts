@@ -192,64 +192,13 @@ export class LobbysSystem {
     };
   }
 
-  public hide(id: string) {
-    const data = this.cache.get(id);
-    if (!data) {
-      return {
-        status: false,
-        message: "Не удалось найти лобби с таким ID!",
-      };
-    }
-
-    const overwrites: OverwriteData[] = [];
-    for (const [, role] of data.channel.guild.roles.cache) {
-      if (role.tags && role.tags?.botId) continue;
-      if (role.permissions.has("Administrator")) continue;
-
-      overwrites.push({
-        id: role.id,
-        deny: ["ViewChannel"],
-      });
-    }
-
-    data.channel.permissionOverwrites.set(overwrites);
-
-    return {
-      status: true,
-    };
-  }
-
-  public show(id: string) {
-    const data = this.cache.get(id);
-    if (!data) {
-      return {
-        status: false,
-        message: "Не удалось найти лобби с таким ID!",
-      };
-    }
-
-    const overwrites: OverwriteData[] = [];
-    for (const [, role] of data.channel.guild.roles.cache) {
-      if (role.tags && role.tags.botId) continue;
-      if (role.permissions.has("Administrator")) continue;
-
-      overwrites.push({
-        id: role.id,
-        allow: ["ViewChannel"],
-      });
-    }
-
-    data.channel.permissionOverwrites.set(overwrites);
-
-    return {
-      status: true,
-    };
-  }
-
   private handle() {
     if (!this.cache) this.cache = new Collection();
 
-    console.log("[Lobbys] Creating Handler for Client#voiceStateUpdate Event");
+    console.log(
+      "[Lobbys] Creating Handler for Client#voiceStateUpdate Event\n"
+    );
+
     this.client.on("voiceStateUpdate", async (oldState, newState) => {
       var joined = !oldState.channel === null && newState.channel !== null;
       var left = oldState.channel !== null && newState.channel === null;

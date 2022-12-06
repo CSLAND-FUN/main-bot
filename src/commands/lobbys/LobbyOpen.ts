@@ -15,11 +15,9 @@ export = class LobbyCloseCommand extends Command {
   async run(client: DiscordBot, message: Message, args: string[]) {
     if (!message.member.voice.channel) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Создайте лобби чтобы продолжить!")
+        bold("Создайте лобби чтобы продолжить!"),
+        "❌"
       );
 
       return message.reply({
@@ -30,13 +28,9 @@ export = class LobbyCloseCommand extends Command {
     const lobby = client.lobbys.checkLobby(message.member.voice.channel.id);
     if (!lobby) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold(
-          "❌ | Не удалось найти лобби с таким ID, скорее всего вы зашли в публичное лобби!"
-        )
+        bold("Не удалось найти лобби с таким ID!"),
+        "❌"
       );
 
       return message.reply({
@@ -51,11 +45,9 @@ export = class LobbyCloseCommand extends Command {
 
     if (!permission) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | У вас нет прав редактировать данное лобби!")
+        bold("У вас нет прав редактировать данное лобби!"),
+        "❌"
       );
 
       return message.reply({
@@ -66,11 +58,9 @@ export = class LobbyCloseCommand extends Command {
     client.lobbys.open(message.member.voice.channel.id);
 
     const embed = this.embed(
-      client,
-      message,
       "DarkPurple",
-      "user",
-      bold(`✅ | Лобби успешно открыто для всех!`)
+      bold(`Лобби успешно открыто для всех!`),
+      "✅"
     );
 
     const msg = await message.reply({

@@ -15,11 +15,9 @@ export = class LobbySizeCommand extends Command {
   async run(client: DiscordBot, message: Message, args: string[]) {
     if (!message.member.voice.channel) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Создайте лобби чтобы продолжить!")
+        bold("Создайте лобби чтобы продолжить!"),
+        "❌"
       );
 
       return message.reply({
@@ -30,13 +28,9 @@ export = class LobbySizeCommand extends Command {
     const lobby = client.lobbys.checkLobby(message.member.voice.channel.id);
     if (!lobby) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold(
-          "❌ | Не удалось найти лобби с таким ID, скорее всего вы зашли в публичное лобби!"
-        )
+        bold("Не удалось найти лобби с таким ID!"),
+        "❌"
       );
 
       return message.reply({
@@ -51,11 +45,9 @@ export = class LobbySizeCommand extends Command {
 
     if (!permission) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | У вас нет прав редактировать данное лобби!")
+        bold("У вас нет прав редактировать данное лобби!"),
+        "❌"
       );
 
       return message.reply({
@@ -72,11 +64,9 @@ export = class LobbySizeCommand extends Command {
       (limit && (limit as unknown as number) > 99)
     ) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Укажите новый лимит участников (число от 0 до 99)!")
+        bold("Укажите новый лимит участников (число от 0 до 99)!"),
+        "❌"
       );
 
       return message.reply({
@@ -90,11 +80,9 @@ export = class LobbySizeCommand extends Command {
     );
 
     const embed = this.embed(
-      client,
-      message,
       "DarkPurple",
-      "user",
-      bold("✅ | Конфигурация лобби изменена!")
+      bold("Конфигурация лобби изменена!"),
+      "✅"
     );
 
     const msg = await message.reply({

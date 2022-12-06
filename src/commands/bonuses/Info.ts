@@ -3,7 +3,7 @@ import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
 import { Message } from "discord.js";
 
-import config from "../../config.json";
+import config from "@src/config.json";
 
 const GROUPS = {
   1: "Игрок",
@@ -45,14 +45,7 @@ export = class InfoCommand extends Command {
       res.push(`**Причина: ${reason}**`);
     }
 
-    const embed = this.embed(
-      client,
-      message,
-      "DarkPurple",
-      "user",
-      res.join("\n")
-    );
-
+    const embed = this.embed("DarkPurple", res.join("\n"));
     return message.reply({
       embeds: [embed],
     });

@@ -15,8 +15,8 @@ export = class TopCommand extends Command {
 
   async run(client: DiscordBot, message: Message, args: string[]) {
     const top = await client.bonuses.top(message);
-    const embed = this.embed(client, message, "DarkPurple", "user", top);
-    embed.setTitle("Топ 50 по бонусам");
+    const embed = this.embed("DarkPurple", top);
+    embed.setTitle("Текущий Топ-50 (по бонусам)");
 
     return message.reply({
       embeds: [embed],

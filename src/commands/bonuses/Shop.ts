@@ -1,7 +1,6 @@
-import { HistoryType } from "@modules/bonuses";
 import { Command, CommandCategory } from "@src/classes/Command";
-import DiscordBot from "@src/classes/Discord";
-import Functions from "@src/classes/Functions";
+import { HistoryType } from "@modules/bonuses";
+import { ROLES } from "@src/config.json";
 import {
   ActionRowBuilder,
   bold,
@@ -10,6 +9,9 @@ import {
   ComponentType,
   Message,
 } from "discord.js";
+
+import DiscordBot from "@src/classes/Discord";
+import Functions from "@src/classes/Functions";
 
 export = class ShopCommand extends Command {
   constructor() {
@@ -24,6 +26,10 @@ export = class ShopCommand extends Command {
   async run(client: DiscordBot, message: Message, args: string[]) {
     const data = await client.bonuses.data(message.author.id);
 
+    const bronzeData = ROLES[0];
+    const liteData = ROLES[1];
+    const megaData = ROLES[2];
+
     const bronzeCost = await this.getCost(client, data.id, 1);
     const liteCost = await this.getCost(client, data.id, 2);
     const megaCost = await this.getCost(client, data.id, 3);
@@ -33,9 +39,9 @@ export = class ShopCommand extends Command {
     const megaText = this.getInfo("mega", megaCost.string);
 
     const [bronzeEmbed, liteEmbed, megaEmbed] = [
-      this.embed(client, message, "DarkPurple", "user", bronzeText),
-      this.embed(client, message, "DarkPurple", "user", liteText),
-      this.embed(client, message, "DarkPurple", "user", megaText),
+      this.embed("DarkPurple", bronzeText),
+      this.embed("DarkPurple", liteText),
+      this.embed("DarkPurple", megaText),
     ];
 
     const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -86,11 +92,9 @@ export = class ShopCommand extends Command {
             ]);
 
             const embed = this.embed(
-              client,
-              message,
               "Red",
-              "user",
-              bold(`❌ | Вам не хватает ${diff} ${word} для покупки Bronze!`)
+              bold(`Вам не хватает ${diff} ${word} для покупки Bronze!`),
+              "❌"
             );
 
             btn.update({
@@ -113,7 +117,7 @@ export = class ShopCommand extends Command {
             data.roles + "1"
           );
 
-          message.member.roles.add("939139061812174908");
+          message.member.roles.add(bronzeData.id);
           await client.bonuses.createHistoryItem({
             type: HistoryType.BONUS,
 
@@ -125,11 +129,9 @@ export = class ShopCommand extends Command {
           });
 
           const embed = this.embed(
-            client,
-            message,
             "DarkPurple",
-            "user",
-            bold(`✅ | Вы купили Bronze за ${bronzeCost.string}!`)
+            bold(`Вы купили Bronze за ${bronzeCost.string}!`),
+            "✅"
           );
 
           btn.update({
@@ -150,11 +152,9 @@ export = class ShopCommand extends Command {
             ]);
 
             const embed = this.embed(
-              client,
-              message,
               "Red",
-              "user",
-              bold(`❌ | Вам не хватает ${diff} ${word} для покупки Lite!`)
+              bold(`Вам не хватает ${diff} ${word} для покупки Lite!`),
+              "❌"
             );
 
             btn.update({
@@ -177,7 +177,7 @@ export = class ShopCommand extends Command {
             data.roles + "2"
           );
 
-          message.member.roles.add("939139424200052816");
+          message.member.roles.add(liteData.id);
           await client.bonuses.createHistoryItem({
             type: HistoryType.BONUS,
 
@@ -189,11 +189,9 @@ export = class ShopCommand extends Command {
           });
 
           const embed = this.embed(
-            client,
-            message,
             "DarkPurple",
-            "user",
-            bold(`✅ | Вы купили Lite за ${liteCost.string}!`)
+            bold(`Вы купили Lite за ${liteCost.string}!`),
+            "✅"
           );
 
           btn.update({
@@ -214,11 +212,9 @@ export = class ShopCommand extends Command {
             ]);
 
             const embed = this.embed(
-              client,
-              message,
               "Red",
-              "user",
-              bold(`❌ | Вам не хватает ${diff} ${word} для покупки MEGA!`)
+              bold(`Вам не хватает ${diff} ${word} для покупки MEGA!`),
+              "❌"
             );
 
             btn.update({
@@ -241,7 +237,7 @@ export = class ShopCommand extends Command {
             data.roles + "3"
           );
 
-          message.member.roles.add("939139723560120353");
+          message.member.roles.add(megaData.id);
           await client.bonuses.createHistoryItem({
             type: HistoryType.BONUS,
 
@@ -253,11 +249,9 @@ export = class ShopCommand extends Command {
           });
 
           const embed = this.embed(
-            client,
-            message,
             "DarkPurple",
-            "user",
-            bold(`✅ | Вы купили MEGA за ${megaCost.string}!`)
+            bold(`Вы купили MEGA за ${megaCost.string}!`),
+            "✅"
           );
 
           btn.update({

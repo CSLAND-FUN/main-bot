@@ -19,14 +19,7 @@ export = class WhitelistCommand extends Command {
       message.guild.members.cache.get(args[0]);
 
     if (!member) {
-      const embed = this.embed(
-        client,
-        message,
-        "Red",
-        "user",
-        bold("❌ | Укажите участника!")
-      );
-
+      const embed = this.embed("Red", bold("Укажите участника!"), "❌");
       return message.reply({
         embeds: [embed],
       });
@@ -34,13 +27,11 @@ export = class WhitelistCommand extends Command {
 
     client.bonuses.whitelist(member.id);
     const embed = this.embed(
-      client,
-      message,
       "DarkPurple",
-      "user",
       bold(
-        `✅ | Вы вернули пользователю ${member.toString()} доступ системе Бонусов!`
-      )
+        `Вы вернули пользователю ${member.toString()} доступ системе Бонусов!`
+      ),
+      "✅"
     );
 
     return message.reply({

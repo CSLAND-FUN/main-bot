@@ -1,5 +1,6 @@
 import type { ClientEvents } from "discord.js";
 import DiscordBot from "./Discord";
+import Logger from "./Logger";
 
 type DistubeEventsTyped =
   | "error"
@@ -19,7 +20,7 @@ type DistubeEventsTyped =
   | "searchInvalidAnswer"
   | "searchResult";
 
-type If<V extends boolean, ForTrue, ForFalse = null> = V extends true
+type If<R extends boolean, ForTrue, ForFalse = null> = R extends true
   ? ForTrue
   : ForFalse;
 
@@ -43,6 +44,9 @@ export class Event<
   }
 
   run(client: DiscordBot, ...params: any[]) {
-    throw new Error(`Event#run is not implemented in "${this.name}" Event!`);
+    return Logger.error(
+      `Event#run is not implemented in "${this.name}" Event!`,
+      "Command"
+    );
   }
 }

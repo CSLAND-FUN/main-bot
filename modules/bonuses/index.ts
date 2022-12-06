@@ -529,6 +529,9 @@ export class BonusSystem {
         table.boolean("blacklisted").defaultTo(false);
         table.string("reason", 255).nullable();
 
+        table.string("bonus_used", 255).nullable();
+        table.string("newyear_used", 255).nullable();
+
         return table;
       });
     }

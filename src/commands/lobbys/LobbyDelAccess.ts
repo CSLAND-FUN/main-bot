@@ -16,11 +16,9 @@ export = class LobbyDelAccessCommand extends Command {
   async run(client: DiscordBot, message: Message, args: string[]) {
     if (!message.member.voice.channel) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Создайте лобби чтобы продолжить!")
+        bold("Создайте лобби чтобы продолжить!"),
+        "❌"
       );
 
       return message.reply({
@@ -31,13 +29,9 @@ export = class LobbyDelAccessCommand extends Command {
     const lobby = client.lobbys.checkLobby(message.member.voice.channel.id);
     if (!lobby) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold(
-          "❌ | Не удалось найти лобби с таким ID, скорее всего вы зашли в публичное лобби!"
-        )
+        bold("Не удалось найти лобби с таким ID!"),
+        "❌"
       );
 
       return message.reply({
@@ -52,11 +46,9 @@ export = class LobbyDelAccessCommand extends Command {
 
     if (!permission) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | У вас нет прав редактировать данное лобби!")
+        bold("У вас нет прав редактировать данное лобби!"),
+        "❌"
       );
 
       return message.reply({
@@ -69,11 +61,9 @@ export = class LobbyDelAccessCommand extends Command {
 
     if (!member_or_role) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Упомяните роль или участника!")
+        bold(" Упомяните роль или участника!"),
+        "❌"
       );
 
       return message.reply({
@@ -84,11 +74,9 @@ export = class LobbyDelAccessCommand extends Command {
     client.lobbys.revokeAccess(message.member.voice.channel.id, member_or_role);
 
     const embed = this.embed(
-      client,
-      message,
       "DarkPurple",
-      "user",
-      bold(`✅ | Был убран доступ для ${member_or_role.toString()}!`)
+      bold(`Был убран доступ для ${member_or_role.toString()}!`),
+      "✅"
     );
 
     const msg = await message.reply({

@@ -14,11 +14,9 @@ export = class HelpCommand extends Command {
 
   run(client: DiscordBot, message: Message, args: string[]) {
     const embed = this.embed(
-      client,
-      message,
       "DarkPurple",
-      "user",
-      bold("Вот команды, которые доступны вам.")
+      bold("Вот команды, которые доступны вам."),
+      "💬"
     );
 
     const fields = this.getCommands(client, message);

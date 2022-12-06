@@ -3,8 +3,5 @@
   "editor.formatOnSave": true,
   "editor.tabSize": 2,
   "window.title": "[${rootName}] ${activeEditorShort}",
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": true
-  },
   "files.autoSave": "onWindowChange"
 }

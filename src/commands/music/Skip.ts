@@ -15,11 +15,9 @@ export = class SkipCommand extends Command {
   async run(client: DiscordBot, message: Message, args: string[]) {
     if (!message.member.voice.channel) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Войдите в голосовой канал чтобы продолжить!")
+        bold("Войдите в голосовой канал чтобы продолжить!"),
+        "❌"
       );
 
       return message.reply({
@@ -30,11 +28,9 @@ export = class SkipCommand extends Command {
     const queue = client.player.getQueue(message);
     if (!queue) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | На сервере не проигрывает музыка!")
+        bold("На сервере не проигрывает музыка!"),
+        "❌"
       );
 
       return message.reply({
@@ -45,27 +41,14 @@ export = class SkipCommand extends Command {
     try {
       await queue.skip();
     } catch (error) {
-      const embed = this.embed(
-        client,
-        message,
-        "Red",
-        "user",
-        bold(error.message)
-      );
+      const embed = this.embed("Red", bold(error.message), "❌");
 
       return message.reply({
         embeds: [embed],
       });
     }
 
-    const embed = this.embed(
-      client,
-      message,
-      "DarkPurple",
-      "user",
-      bold("✅ | Песня была пропущена!")
-    );
-
+    const embed = this.embed("DarkPurple", bold("Песня была пропущена!"), "✅");
     return message.reply({
       embeds: [embed],
     });

@@ -14,8 +14,7 @@ export = class EmbedCommand extends Command {
   }
 
   run(client: DiscordBot, message: Message, args: string[]) {
-    const embed = this.embed(client, message, "Random", "bot", args.join(" "));
-    embed.data.author = null;
+    const embed = this.embed("Random", args.join(" "));
 
     return message.channel.send({
       embeds: [embed],

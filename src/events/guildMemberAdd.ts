@@ -1,6 +1,7 @@
-import DiscordBot from "@src/classes/Discord";
-import { Event } from "@src/classes/Event";
 import { EmbedBuilder, GuildMember } from "discord.js";
+import { Event } from "@src/classes/Event";
+import { WELCOME_CHANNEL_ID, AUTOROLE_ID } from "@src/config.json";
+import DiscordBot from "@src/classes/Discord";
 
 export = class GuildMemberAddEvent extends Event {
   constructor() {
@@ -8,12 +9,12 @@ export = class GuildMemberAddEvent extends Event {
   }
 
   async run(client: DiscordBot, member: GuildMember) {
-    const role = member.guild.roles.cache.get("936677179574599751");
+    const role = member.guild.roles.cache.get(AUTOROLE_ID);
     if (role) await member.roles.add(role);
 
     await client.bonuses.data(member.id);
 
-    const channel = member.guild.channels.cache.get("937777349477404703");
+    const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
     if (!channel.isTextBased()) return;
 
     const out = [
@@ -30,10 +31,6 @@ export = class GuildMemberAddEvent extends Event {
 
     const embed = new EmbedBuilder();
     embed.setColor("DarkPurple");
-    embed.setAuthor({
-      name: member.user.tag,
-      iconURL: member.avatarURL({ size: 2048, forceStatic: true }),
-    });
     embed.setDescription(out);
 
     await channel.send({

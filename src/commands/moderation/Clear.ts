@@ -15,13 +15,11 @@ export = class ClearCommand extends Command {
 
   async run(client: DiscordBot, message: Message, args: string[]) {
     const amount = args[0];
-    if (!amount || !Number(amount) || (amount as unknown as number) > 100) {
+    if (!amount || !Number(amount) || (amount as any as number) > 100) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Укажите количество сообщений (число до 100)!")
+        bold("Укажите количество сообщений (число до 100)!"),
+        "❌"
       );
 
       return message.reply({
@@ -30,18 +28,11 @@ export = class ClearCommand extends Command {
     }
 
     await (message.channel as TextChannel).bulkDelete(
-      amount as unknown as number,
+      amount as any as number,
       true
     );
 
-    const embed = this.embed(
-      client,
-      message,
-      "DarkPurple",
-      "user",
-      bold("❌ | Чат был очищен!")
-    );
-
+    const embed = this.embed("DarkPurple", bold("Чат был очищен!"), "❌");
     const msg = await message.reply({
       embeds: [embed],
     });

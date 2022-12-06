@@ -1,6 +1,7 @@
 import { ColorResolvable, EmbedBuilder, Message } from "discord.js";
 import { CommandData } from "../../types/CommandData";
 import DiscordBot from "./Discord";
+import Logger from "./Logger";
 
 export enum CommandCategory {
   LOBBY = "LOBBY",
@@ -21,35 +22,15 @@ export class Command {
   }
 
   run(client: DiscordBot, message: Message, args: string[]) {
-    throw new Error(
-      `Command#run is not implemented in "${this.data.name}" Command!`
+    return Logger.error(
+      `Command#run is not implemented in "${this.data.name}" Command!`,
+      "Command"
     );
   }
 
-  embed(
-    client: DiscordBot,
-    message: Message,
-    color: ColorResolvable,
-    author: "bot" | "user",
-    content: string,
-    emoji?: string
-  ) {
+  embed(color: ColorResolvable, content: string, emoji?: string) {
     return new EmbedBuilder()
       .setColor(color)
-      .setAuthor(
-        author === "bot"
-          ? {
-              name: client.user.tag,
-              iconURL: client.user.avatarURL({ size: 2048, forceStatic: true }),
-            }
-          : {
-              name: message.author.tag,
-              iconURL: message.author.avatarURL({
-                size: 2048,
-                forceStatic: true,
-              }),
-            }
-      )
       .setDescription(
         typeof emoji !== "undefined" ? `${emoji} | ${content}` : content
       );

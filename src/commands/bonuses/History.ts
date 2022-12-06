@@ -23,11 +23,9 @@ export = class HistoryCommand extends Command {
 
     if (!data.length) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Ваша история покупок пустая!")
+        bold("Ваша история покупок пустая!"),
+        "❌"
       );
 
       return message.reply({
@@ -38,10 +36,6 @@ export = class HistoryCommand extends Command {
     const embed = new EmbedBuilder();
     embed.setColor("DarkPurple");
     embed.setTitle("История покупок");
-    embed.setAuthor({
-      name: message.author.tag,
-      iconURL: message.author.avatarURL({ size: 2048, forceStatic: true }),
-    });
 
     for (const entry of data) {
       const type =
@@ -59,6 +53,7 @@ export = class HistoryCommand extends Command {
         name: `[#] ${bold(type)}`,
         value: [
           `› **Цена**: ${bold(`${entry.cost} ${word}`)}`,
+          `› **Сообщение**: ${bold(entry.message)}`,
           `› **Время покупки**: ${time(
             Math.floor(Number(entry.time) / 1000),
             "R"

@@ -21,14 +21,7 @@ export = class BlacklistCommand extends Command {
     const reason = args.slice(1).join(" ") || "Нарушение правил.";
 
     if (!member) {
-      const embed = this.embed(
-        client,
-        message,
-        "Red",
-        "user",
-        bold("❌ | Укажите участника!")
-      );
-
+      const embed = this.embed("Red", bold("Укажите участника!"), "❌");
       return message.reply({
         embeds: [embed],
       });
@@ -36,13 +29,11 @@ export = class BlacklistCommand extends Command {
 
     client.bonuses.blacklist(member.id, reason);
     const embed = this.embed(
-      client,
-      message,
       "DarkPurple",
-      "user",
       bold(
-        `✅ | Вы заблокировали пользователю ${member.toString()} доступ системе Бонусов!`
-      )
+        `Вы заблокировали пользователю ${member.toString()} доступ системе Бонусов!`
+      ),
+      "✅"
     );
 
     return message.reply({

@@ -19,11 +19,9 @@ export = class EvalCommand extends Command {
 
     if (!code) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Напишите код для выполнения!")
+        bold("Напишите код для выполнения!"),
+        "❌"
       );
 
       return message.reply({
@@ -34,14 +32,7 @@ export = class EvalCommand extends Command {
     var evaled = await eval(code);
     if (typeof evaled === "object") evaled = inspect(evaled, { depth: 0 });
 
-    const embed = this.embed(
-      client,
-      message,
-      "DarkPurple",
-      "user",
-      codeBlock("ts", evaled)
-    );
-
+    const embed = this.embed("DarkPurple", codeBlock("ts", evaled));
     return message.reply({
       embeds: [embed],
     });

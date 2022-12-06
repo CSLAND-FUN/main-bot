@@ -15,11 +15,9 @@ export = class PlayCommand extends Command {
   async run(client: DiscordBot, message: Message, args: string[]) {
     if (!message.member.voice.channel) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Войдите в голосовой канал чтобы продолжить!")
+        bold("Войдите в голосовой канал чтобы продолжить!"),
+        "❌"
       );
 
       return message.reply({
@@ -36,14 +34,7 @@ export = class PlayCommand extends Command {
         textChannel: message.channel as TextChannel,
       });
     } catch (error) {
-      const embed = this.embed(
-        client,
-        message,
-        "Red",
-        "user",
-        bold(error.message)
-      );
-
+      const embed = this.embed("Red", bold(error.message), "❌");
       return message.reply({
         embeds: [embed],
       });

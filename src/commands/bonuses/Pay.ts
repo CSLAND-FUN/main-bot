@@ -17,14 +17,7 @@ export = class PayCommand extends Command {
   async run(client: DiscordBot, message: Message, args: string[]) {
     const member = message.mentions.members.first();
     if (!member) {
-      const embed = this.embed(
-        client,
-        message,
-        "Red",
-        "user",
-        bold("❌ | Укажите участника!")
-      );
-
+      const embed = this.embed("Red", bold("Укажите участника!"), "❌");
       return message.reply({
         embeds: [embed],
       });
@@ -32,11 +25,9 @@ export = class PayCommand extends Command {
 
     if (member.id === message.author.id) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Вы не можете передать бонусы самому себе!")
+        bold("Вы не можете передать бонусы самому себе!"),
+        "❌"
       );
 
       return message.reply({
@@ -44,11 +35,9 @@ export = class PayCommand extends Command {
       });
     } else if (member.user.bot) {
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
-        bold("❌ | Вы не можете передать бонусы боту!")
+        bold("Вы не можете передать бонусы боту!"),
+        "❌"
       );
 
       return message.reply({
@@ -57,15 +46,17 @@ export = class PayCommand extends Command {
     }
 
     const amount = args[1];
-    if (!amount || !Number(amount) || amount.includes("-")) {
-      const embed = this.embed(
-        client,
-        message,
-        "Red",
-        "user",
-        bold("❌ | Укажите сумму (число)!")
-      );
+    if (!amount) {
+      const embed = this.embed("Red", bold("Укажите сумму!"), "❌");
+      return message.reply({
+        embeds: [embed],
+      });
+    }
 
+    if (Number.isNaN(amount)) return;
+    const check = Functions.checkNumber(Number(amount), true);
+    if (typeof check !== "number") {
+      const embed = this.embed("Red", bold(check), "❌");
       return message.reply({
         embeds: [embed],
       });
@@ -74,35 +65,26 @@ export = class PayCommand extends Command {
     const result = await client.bonuses.transfer(
       message.author.id,
       member.id,
-      Number(amount)
+      amount as any as number
     );
 
     if ("message" in result) {
-      const embed = this.embed(
-        client,
-        message,
-        "Red",
-        "user",
-        bold(`❌ | ${result.message!}`)
-      );
-
+      const embed = this.embed("Red", bold(result.message), "❌");
       return message.reply({
         embeds: [embed],
       });
     }
 
-    const word = Functions.declOfNum(amount as unknown as number, [
+    const word = Functions.declOfNum(amount as any as number, [
       "бонус",
       "бонуса",
       "бонусов",
     ]);
 
     const embed = this.embed(
-      client,
-      message,
       "DarkPurple",
-      "user",
-      bold(`✅ | Вы передали ${member.toString()} ${amount} ${word}!`)
+      bold(`Вы передали ${member.toString()} ${amount} ${word}!`),
+      "✅"
     );
 
     return message.reply({

@@ -8,6 +8,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.9.0",
     "@discordjs/voice": "^0.13.0",
+    "@distube/deezer": "^1.0.0",
     "@distube/spotify": "^1.4.2",
     "discord.js": "^14.6.0",
     "distube": "^4.0.4",
@@ -18,8 +19,10 @@
     "module-alias": "^2.2.2",
     "mysql": "^2.18.1",
     "node-schedule": "^2.1.0",
+    "picocolors": "^1.0.0",
     "random": "^3.0.6",
-    "undici": "^5.13.0"
+    "undici": "^5.13.0",
+    "zod": "^3.19.1"
   },
   "devDependencies": {
     "@types/gamedig": "^4.0.0",

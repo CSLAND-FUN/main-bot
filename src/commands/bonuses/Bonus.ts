@@ -21,10 +21,7 @@ export = class BonusCommand extends Command {
     if (data.bonus_used !== null && Date.now() < next_use.getTime()) {
       const date = new Date(Number(data.bonus_used) + ms).toLocaleString("ru");
       const embed = this.embed(
-        client,
-        message,
         "Red",
-        "user",
         bold(`Бонус можно получать раз в неделю!\nПопробуйте ещё раз ${date}`),
         "❌"
       );
@@ -47,10 +44,7 @@ export = class BonusCommand extends Command {
     );
 
     const embed = this.embed(
-      client,
-      message,
       "DarkPurple",
-      "user",
       bold(`Вы получили еженедельный бонус в размере 250 бонусов!`),
       "🎉"
     );
