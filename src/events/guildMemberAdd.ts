@@ -15,7 +15,7 @@ export = class GuildMemberAddEvent extends Event {
     await client.bonuses.data(member.id);
 
     const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
-    if (!channel.isTextBased()) return;
+    if (!channel || !channel.isTextBased()) return;
 
     const out = [
       `**${member.toString()}, добро пожаловать на официальный сервер проекта CsLand!**`,

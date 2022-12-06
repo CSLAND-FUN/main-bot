@@ -28,7 +28,7 @@ const ms = 86400000;
 export = class NewYearCommand extends Command {
   constructor() {
     super({
-      category: CommandCategory.BONUSES,
+      category: CommandCategory.OTHER,
       name: "newyear",
 
       description: "Ежедневная новогодняя раздача в течение Нового Года.",
