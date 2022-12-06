@@ -1,5 +1,3 @@
-import DiscordBot from "@src/classes/Discord";
-import Functions from "@src/classes/Functions";
 import {
   Channel,
   Collection,
@@ -7,9 +5,12 @@ import {
   Message,
   VoiceBasedChannel,
 } from "discord.js";
-import random from "random";
-
 import { cancelJob, Job, scheduleJob } from "node-schedule";
+
+import DiscordBot from "@src/classes/Discord";
+import Functions from "@src/classes/Functions";
+import Logger from "@src/classes/Logger";
+import random from "random";
 
 import Knex from "knex";
 import config from "../../src/config.json";
@@ -382,7 +383,7 @@ export class BonusSystem {
   }
 
   private handle() {
-    console.log("[Bonuses] Creating Handler for Client#voiceStateUpdate Event");
+    Logger.log("Creating Handler for Client#voiceStateUpdate Event", "Bonuses");
     this.client.on("voiceStateUpdate", async (oldState, newState) => {
       if (oldState.member.user.bot || newState.member.user.bot) return;
       if (
@@ -412,7 +413,7 @@ export class BonusSystem {
             if (job) continue;
 
             await this.startCount(member.id, newState.channel);
-            console.log(`[Bonuses] Started job for ${member.user.tag}`);
+            Logger.log(`Started job for ${member.user.tag}`, "Bonuses");
 
             const users = this.users.get(newState.channel.id);
             if (!users) {
@@ -570,7 +571,7 @@ export class BonusSystem {
       if (data.counting !== 1) continue;
 
       await this.update(id, "counting", 0);
-      console.log(`[Bonuses] Stopped counting for ${id} due to bot restart.`);
+      Logger.log(`Stopped counting for ${id} due to bot restart.`, "Bonuses");
     }
   }
 }

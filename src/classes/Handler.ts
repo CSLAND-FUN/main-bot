@@ -51,8 +51,6 @@ export = class Handler {
       Logger.debug(`Loaded "${event.name}" Event!`, "Handler");
     }
 
-    console.log("\n");
-
     for (const commandPath of commands) {
       const commandFile = await (
         await import(path.resolve(process.cwd(), commandPath))

@@ -1,6 +1,8 @@
 import { Event } from "@src/classes/Event";
+
 import DiscordBot from "@src/classes/Discord";
 import serverStatus from "@src/messages/serverStatus";
+import Logger from "@src/classes/Logger";
 
 export = class ReadyEvent extends Event {
   constructor() {
@@ -8,7 +10,7 @@ export = class ReadyEvent extends Event {
   }
 
   async run(client: DiscordBot) {
-    console.log(`${client.user.tag} is started!`);
+    Logger.log(`${client.user.tag} is started!`);
 
     await serverStatus(client);
   }

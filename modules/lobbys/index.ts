@@ -1,14 +1,15 @@
-import DiscordBot from "@src/classes/Discord";
 import {
   ChannelType,
   Collection,
   GuildMember,
-  OverwriteData,
   Role,
   VoiceChannel,
   VoiceState,
 } from "discord.js";
 import { scheduleJob } from "node-schedule";
+
+import DiscordBot from "@src/classes/Discord";
+import Logger from "@src/classes/Logger";
 
 interface Lobby {
   id: string;
@@ -41,12 +42,9 @@ export class LobbysSystem {
     this.handle();
 
     scheduleJob("*/5 * * * *", async () => {
-      console.log("[Lobbys] Cleaning up cache...");
+      if (!this.cache.size) return;
 
-      if (!this.cache.size) {
-        return null;
-      }
-
+      Logger.log("Cleaning up cache...", "Lobbys");
       for (const id of this.cache.keys()) {
         const channel = this.client.channels.cache.get(id);
         if (!channel) this.cache.delete(id);
@@ -195,8 +193,9 @@ export class LobbysSystem {
   private handle() {
     if (!this.cache) this.cache = new Collection();
 
-    console.log(
-      "[Lobbys] Creating Handler for Client#voiceStateUpdate Event\n"
+    Logger.log(
+      "Creating Handler for Client#voiceStateUpdate Event\n",
+      "Lobbys"
     );
 
     this.client.on("voiceStateUpdate", async (oldState, newState) => {
