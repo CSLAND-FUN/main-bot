@@ -11,7 +11,7 @@ export = class GuildMemberAddEvent extends Event {
     const role = member.guild.roles.cache.get(process.env.AUTOROLE_ID);
     if (role) await member.roles.add(role);
 
-    await client.bonuses.data(member.id);
+    if(!member.user.bot) await client.bonuses.data(member.id);
 
     // prettier-ignore
     const channel = member.guild.channels.cache.get(process.env.WELCOME_CHANNEL_ID);
