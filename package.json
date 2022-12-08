@@ -41,6 +41,6 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "production": "cd dist/src && node starter.js --production",
-    "development": "cd src && ts-node starter.ts --dev-mode",
+    "development": "cd src && ts-node starter.ts --dev-mode"
   }
 }
