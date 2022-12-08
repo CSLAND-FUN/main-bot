@@ -13,14 +13,13 @@ import Logger from "@src/classes/Logger";
 import random from "random";
 
 import Knex from "knex";
-import config from "../../src/config.json";
 const knex = Knex({
   client: "mysql",
   connection: {
-    host: config.DATABASE.HOST,
-    user: config.DATABASE.USER,
-    password: config.DATABASE.PASS,
-    database: config.DATABASE.DATABASE,
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASS,
+    database: process.env.MYSQL_DATA,
   },
 });
 
@@ -80,7 +79,7 @@ export class BonusSystem {
       const all = await this.all();
       const filtered = all.filter((u) => u.counting === 1);
 
-      const guild = this.client.guilds.cache.get(config.SERVER_ID);
+      const guild = this.client.guilds.cache.get(process.env.SERVER_ID);
       for (const user of filtered) {
         var member: GuildMember;
         try {
@@ -129,7 +128,7 @@ export class BonusSystem {
     //? Check Jobs every minute.
     scheduleJob("*/1 * * * *", async () => {
       const _all = this.jobs.keys();
-      const guild = this.client.guilds.cache.get(config.SERVER_ID);
+      const guild = this.client.guilds.cache.get(process.env.SERVER_ID);
 
       for (const user of _all) {
         var member: GuildMember;
@@ -387,8 +386,8 @@ export class BonusSystem {
     this.client.on("voiceStateUpdate", async (oldState, newState) => {
       if (oldState.member.user.bot || newState.member.user.bot) return;
       if (
-        oldState.guild.id !== config.SERVER_ID ||
-        newState.guild.id !== config.SERVER_ID
+        oldState.guild.id !== process.env.SERVER_ID ||
+        newState.guild.id !== process.env.SERVER_ID
       ) {
         return;
       }
@@ -556,7 +555,7 @@ export class BonusSystem {
   }
 
   private async checker() {
-    const guild = this.client.guilds.cache.get(config.SERVER_ID);
+    const guild = this.client.guilds.cache.get(process.env.SERVER_ID);
     if (!guild) return;
 
     const all_user_ids = await this.knex<BonusUser>("bonus_users")

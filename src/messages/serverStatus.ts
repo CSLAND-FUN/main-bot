@@ -3,12 +3,13 @@ import Logger from "@src/classes/Logger";
 import getServers from "@src/functions/getServers";
 
 import { EmbedBuilder, Message, TextChannel } from "discord.js";
-import { STATUS_CHANNEL_ID } from "../config.json";
 
 export default async function serverStatus(client: DiscordBot) {
   Logger.log("Initialized ServerStatus Message!", "CSLAND");
-  // prettier-ignore
-  const channel = (await client.channels.fetch(STATUS_CHANNEL_ID)) as TextChannel;
+
+  const channel = (await client.channels.fetch(
+    process.env.STATUS_CHANNEL_ID
+  )) as TextChannel;
 
   const embed = new EmbedBuilder();
   embed.setColor("DarkPurple");
@@ -24,7 +25,7 @@ export default async function serverStatus(client: DiscordBot) {
   await editMessage(embed, msg);
   setInterval(async () => {
     await editMessage(embed, msg);
-  }, 300000);
+  }, 600000);
 }
 
 async function editMessage(embed: EmbedBuilder, msg: Message) {

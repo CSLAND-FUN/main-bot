@@ -16,11 +16,6 @@ import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
 
 import { FormData, request } from "undici";
-import {
-  BASE_URL,
-  NOTIF_CHANNEL_ID,
-  OAUTH_SECRET_TOKEN,
-} from "@src/config.json";
 import random from "random";
 
 const ms = 86400000;
@@ -77,12 +72,12 @@ export = class NewYearCommand extends Command {
       form.append("value", value);
 
       const data = await (
-        await request(BASE_URL, {
+        await request(process.env.API_BASE_URL, {
           body: form,
           method: "POST",
 
           headers: {
-            TOKEN: OAUTH_SECRET_TOKEN,
+            TOKEN: process.env.API_SECRET_TOKEN,
           },
         })
       ).body.json();
@@ -159,8 +154,9 @@ export = class NewYearCommand extends Command {
         )
       );
 
-      // prettier-ignore
-      const channel = message.guild.channels.cache.get(NOTIF_CHANNEL_ID) as TextChannel;
+      const channel = message.guild.channels.cache.get(
+        process.env.NOTIFICATIONS_CHANNEL_ID
+      ) as TextChannel;
 
       channel.send({
         embeds: [info_embed],

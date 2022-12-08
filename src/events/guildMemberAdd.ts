@@ -1,6 +1,5 @@
 import { EmbedBuilder, GuildMember } from "discord.js";
 import { Event } from "@src/classes/Event";
-import { WELCOME_CHANNEL_ID, AUTOROLE_ID } from "@src/config.json";
 import DiscordBot from "@src/classes/Discord";
 
 export = class GuildMemberAddEvent extends Event {
@@ -9,12 +8,13 @@ export = class GuildMemberAddEvent extends Event {
   }
 
   async run(client: DiscordBot, member: GuildMember) {
-    const role = member.guild.roles.cache.get(AUTOROLE_ID);
+    const role = member.guild.roles.cache.get(process.env.AUTOROLE_ID);
     if (role) await member.roles.add(role);
 
     await client.bonuses.data(member.id);
 
-    const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
+    // prettier-ignore
+    const channel = member.guild.channels.cache.get(process.env.WELCOME_CHANNEL_ID);
     if (!channel || !channel.isTextBased()) return;
 
     const out = [

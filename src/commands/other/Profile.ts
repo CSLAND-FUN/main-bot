@@ -1,9 +1,8 @@
+import { bold, EmbedBuilder, Message } from "discord.js";
 import { Command, CommandCategory } from "@src/classes/Command";
 import DiscordBot from "@src/classes/Discord";
-import { bold, EmbedBuilder, Message } from "discord.js";
 
 import { FormData, request } from "undici";
-import { BASE_URL } from "@src/config.json";
 import Functions from "@src/classes/Functions";
 
 export = class ProfileCommand extends Command {
@@ -43,7 +42,7 @@ export = class ProfileCommand extends Command {
     form.append("id", id);
 
     const req = await (
-      await request(BASE_URL, {
+      await request(process.env.API_BASE_URL, {
         method: "POST",
         body: form,
       })
@@ -123,7 +122,7 @@ export = class ProfileCommand extends Command {
       }
     );
 
-    return await message.reply({
+    return message.reply({
       embeds: [embed],
     });
   }

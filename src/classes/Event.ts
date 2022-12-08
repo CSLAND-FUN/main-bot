@@ -26,7 +26,7 @@ type If<R extends boolean, ForTrue, ForFalse = null> = R extends true
 
 export class Event<
   DiscordEvent extends boolean = true,
-  DistubeEvents extends boolean = false
+  DistubeEvent extends boolean = false
 > {
   public name: string;
   public emitter?: string;
@@ -35,7 +35,7 @@ export class Event<
     name: If<
       DiscordEvent,
       keyof ClientEvents,
-      If<DistubeEvents, DistubeEventsTyped, string>
+      If<DistubeEvent, DistubeEventsTyped, string>
     >,
     emitter?: string
   ) {

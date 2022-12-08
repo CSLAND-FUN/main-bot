@@ -1,9 +1,8 @@
 import { Command, CommandCategory } from "@src/classes/Command";
+import { Message } from "discord.js";
+import { ROLES } from "@cfgs/shop_roles";
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
-import { Message } from "discord.js";
-
-import config from "@src/config.json";
 
 const GROUPS = {
   1: "Игрок",
@@ -46,6 +45,14 @@ export = class InfoCommand extends Command {
     }
 
     const embed = this.embed("DarkPurple", res.join("\n"));
+    embed.setAuthor({
+      name: message.author.tag,
+      iconURL: message.author.displayAvatarURL({
+        forceStatic: true,
+        size: 2048,
+      }),
+    });
+
     return message.reply({
       embeds: [embed],
     });
@@ -57,7 +64,7 @@ export = class InfoCommand extends Command {
 
     const out = [];
     for (const _role of data.roles) {
-      const role = config.ROLES.find((x) => x.role_num === Number(_role));
+      const role = ROLES.find((x) => x.role_num === Number(_role));
       out.push(role.role_name);
     }
 

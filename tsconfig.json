@@ -13,13 +13,13 @@
     "declaration": false,
     "outDir": "dist/",
     "baseUrl": ".",
-    "types": ["node", "./types"],
+    "types": ["./types/"],
     "paths": {
       "@src/*": ["src/*"],
       "@modules/*": ["modules/*"],
-      "@cfg": ["src/config.json"]
+      "@cfgs/*": ["configs/*"]
     }
   },
-  "include": ["src", "modules"],
+  "include": ["src", "modules", "configs"],
   "exclude": ["node_modules"]
 }

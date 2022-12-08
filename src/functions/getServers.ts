@@ -1,5 +1,5 @@
 import { query, QueryOptions, QueryResult } from "gamedig";
-import { SERVERS, SERVER_NAMES } from "../config.json";
+import { SERVERS, SERVER_NAMES } from "@cfgs/servers";
 const statuses = ["⚫️ Неизвестно", "🟢 Онлайн", "🔴 Не работает"];
 
 interface ReturnStatus {

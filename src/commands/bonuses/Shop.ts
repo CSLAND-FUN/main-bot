@@ -1,6 +1,3 @@
-import { Command, CommandCategory } from "@src/classes/Command";
-import { HistoryType } from "@modules/bonuses";
-import { ROLES } from "@src/config.json";
 import {
   ActionRowBuilder,
   bold,
@@ -9,6 +6,9 @@ import {
   ComponentType,
   Message,
 } from "discord.js";
+import { Command, CommandCategory } from "@src/classes/Command";
+import { HistoryType } from "@modules/bonuses";
+import { ROLES } from "@cfgs/shop_roles";
 
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";

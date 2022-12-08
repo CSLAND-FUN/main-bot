@@ -1,6 +1,5 @@
 import { ActivityType, Client, Collection } from "discord.js";
 import Handler from "./Handler";
-import config from "../config.json";
 
 import { BonusSystem } from "@modules/bonuses";
 import { LobbysSystem } from "@modules/lobbys";
@@ -40,7 +39,11 @@ export = class DiscordBot extends Client {
     this.events = new Collection();
 
     this.bonuses = new BonusSystem(this);
-    this.lobbys = new LobbysSystem(this, config.CATEGORY_ID, config.PARENT_ID);
+    this.lobbys = new LobbysSystem(
+      this,
+      process.env.LOBBYS_CATEGORY_ID,
+      process.env.LOBBYS_CHANNEL_ID
+    );
 
     this.player = new DisTube(this, {
       emptyCooldown: 15000,
@@ -64,6 +67,6 @@ export = class DiscordBot extends Client {
   async start() {
     new Handler(this).loadAll();
 
-    await this.login(config.TOKEN);
+    await this.login(process.env.BOT_TOKEN);
   }
 };

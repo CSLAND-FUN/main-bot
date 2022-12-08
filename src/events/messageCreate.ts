@@ -1,7 +1,6 @@
-import DiscordBot from "@src/classes/Discord";
-import { Event } from "@src/classes/Event";
 import { Message } from "discord.js";
-import config from "../config.json";
+import { Event } from "@src/classes/Event";
+import DiscordBot from "@src/classes/Discord";
 
 export = class MessageCreateEvent extends Event {
   constructor() {
@@ -11,6 +10,7 @@ export = class MessageCreateEvent extends Event {
   async run(client: DiscordBot, message: Message) {
     if (!message.inGuild() || message.author.bot) return;
     if (!message.content.startsWith("!")) return;
+    if (message.channel.id !== process.env.COMMANDS_CHANNEL_ID) return;
 
     const args = message.content.slice("!".length).trim().split(" ");
     const cmd = args.shift().toLowerCase();
@@ -18,21 +18,22 @@ export = class MessageCreateEvent extends Event {
     // prettier-ignore
     const command = client.commands.get(cmd) || client.commands.get(client.aliases.get(cmd));
     if (!command) {
-      return await message.react("❌");
+      return message.react("❌");
     }
 
+    const owners = process.env.OWNERS.split(",");
     if (
       command.data.ownerOnly === true &&
-      !config.OWNERS.includes(message.author.id)
+      !owners.includes(message.author.id)
     ) {
-      return await message.react("❌");
+      return message.react("❌");
     }
 
     if (
       command.data.permissions &&
       !message.member.permissions.has(command.data.permissions)
     ) {
-      return await message.react("❌");
+      return message.react("❌");
     }
 
     await command.run(client, message, args);
