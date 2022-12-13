@@ -28,7 +28,7 @@ export = class DiscordBot extends Client {
         activities: [
           {
             type: ActivityType.Competing,
-            name: "",
+            name: "csland.fun",
           },
         ],
       },
@@ -42,7 +42,7 @@ export = class DiscordBot extends Client {
     this.lobbys = new LobbysSystem(
       this,
       process.env.LOBBYS_CATEGORY_ID,
-      process.env.LOBBYS_CHANNEL_ID
+      process.env.LOBBYS_PARENT_ID
     );
 
     this.player = new DisTube(this, {

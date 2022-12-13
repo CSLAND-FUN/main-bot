@@ -199,7 +199,7 @@ export class LobbysSystem {
     );
 
     this.client.on("voiceStateUpdate", async (oldState, newState) => {
-      var joined = !oldState.channel === null && newState.channel !== null;
+      var joined = oldState.channel === null && newState.channel !== null;
       var left = oldState.channel !== null && newState.channel === null;
       var switched = oldState.channel !== null && newState.channel !== null;
 
@@ -209,9 +209,8 @@ export class LobbysSystem {
 
         if (category) {
           if (parent) {
-            const cached = this.cache.find((x) => {
-              return x.owner === newState.member.id;
-            });
+            // prettier-ignore
+            const cached = this.cache.find((x) => x.owner === newState.member.id);
             if (cached) return;
 
             const channel = await this.createChannel(newState);
@@ -244,9 +243,8 @@ export class LobbysSystem {
 
         if (category) {
           if (parent) {
-            const cached = this.cache.find((x) => {
-              return x.owner === newState.member.id;
-            });
+            // prettier-ignore
+            const cached = this.cache.find((x) => x.owner === newState.member.id);
             if (cached) return;
 
             const channel = await this.createChannel(newState);

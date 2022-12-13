@@ -3,14 +3,14 @@ console.clear();
 import Logger from "./classes/Logger";
 import dotenv from "dotenv";
 
-const flag = process.argv[2];
-if (flag === "--dev-mode") {
+const flags = process.argv;
+if (flags.includes("--dev-mode")) {
   dotenv.config({
     path: "../configs/.env.development",
   });
 
   Logger.debug("Starting in Development Mode\n", "Starter");
-} else if (flag === "--production") {
+} else if (flags.includes("--production")) {
   dotenv.config({
     path: "../configs/.env.production",
   });
