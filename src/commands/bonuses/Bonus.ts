@@ -1,6 +1,6 @@
 import { Command, CommandCategory } from "@src/classes/Command";
-import DiscordBot from "@src/classes/Discord";
 import { bold, Message } from "discord.js";
+import DiscordBot from "@src/classes/Discord";
 
 const ms = 604800000;
 
@@ -16,13 +16,19 @@ export = class BonusCommand extends Command {
 
   async run(client: DiscordBot, message: Message, args: string[]) {
     const data = await client.bonuses.data(message.author.id);
-    const next_use = new Date(Number(data.bonus_used) + ms);
+    const next_time = Number(data.bonus_used) + ms;
 
-    if (data.bonus_used !== null && Date.now() < next_use.getTime()) {
-      const date = new Date(Number(data.bonus_used) + ms).toLocaleString("ru");
+    if (data.bonus_used !== null && Date.now() < next_time) {
+      // prettier-ignore
+      const date = new Date(next_time).toLocaleString("ru", { timeZone: "Europe/Moscow" });
       const embed = this.embed(
         "Red",
-        bold(`Бонус можно получать раз в неделю!\nПопробуйте ещё раз ${date}`),
+        bold(
+          [
+            `Бонус можно получать раз в неделю!`,
+            `Попробуйте ещё раз ${date}`,
+          ].join("\n")
+        ),
         "❌"
       );
 

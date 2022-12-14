@@ -32,14 +32,19 @@ export = class NewYearCommand extends Command {
 
   async run(client: DiscordBot, message: Message, args: string[]) {
     const data = await client.bonuses.data(message.author.id);
-    const next_use = new Date(Number(data.newyear_used) + ms);
+    const next_time = Number(data.newyear_used) + ms;
 
-    if (data.bonus_used !== null && Date.now() < next_use.getTime()) {
+    if (data.newyear_used !== null && Date.now() < next_time) {
       // prettier-ignore
-      const date = new Date(Number(data.newyear_used) + ms).toLocaleString("ru");
+      const date = new Date(next_time).toLocaleString("ru", { timeZone: "Europe/Moscow" });
       const embed = this.embed(
         "Red",
-        bold(`Вы уже получили ежедневный новогодний бонус!\nЖдём вас ${date}`),
+        bold(
+          [
+            `Вы уже получили ежедневный новогодний бонус!`,
+            `Ждём вас ${date}`,
+          ].join("\n")
+        ),
         "❌"
       );
 
