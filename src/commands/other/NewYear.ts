@@ -49,11 +49,11 @@ export = class NewYearCommand extends Command {
     }
 
     const give_bonuses = random.int(0, 1) === 0 ? false : true;
-    const random_choose = [1, 1, 1, 2, 3, 3, 3, 3, 3];
+    const random_choose = [1, 1, 1, 2, 3, 3, 3];
     const pick =
       give_bonuses === false
         ? random_choose[Math.floor(Math.random() * random_choose.length)]
-        : random.int(100, 500);
+        : random.int(100, 250);
 
     if (give_bonuses === false) {
       var value = 0;
@@ -148,7 +148,7 @@ export = class NewYearCommand extends Command {
           [
             `› Пользователь: ${message.author.toString()}`,
             `› Тип: ${data.pretty_type}`,
-            `› Ключ: ||${data.key}|| (не трогать просто так)`,
+            `› Ключ: ||${data.key}||`,
             `› Сумма/Скидка: ${data.val}`,
           ].join("\n")
         )
