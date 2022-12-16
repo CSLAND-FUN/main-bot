@@ -7,10 +7,10 @@
   "license": "Apache",
   "dependencies": {
     "@discordjs/opus": "^0.9.0",
-    "@discordjs/voice": "^0.13.0",
+    "@discordjs/voice": "^0.14.0",
     "@distube/deezer": "^1.0.0",
-    "@distube/spotify": "^1.4.2",
-    "discord.js": "^14.6.0",
+    "@distube/spotify": "^1.4.5",
+    "discord.js": "^14.7.1",
     "distube": "^4.0.4",
     "dotenv": "^16.0.3",
     "gamedig": "^4.0.5",
@@ -22,15 +22,15 @@
     "node-schedule": "^2.1.0",
     "picocolors": "^1.0.0",
     "random": "^3.0.6",
-    "undici": "^5.13.0",
+    "undici": "^5.14.0",
     "uuid": "^9.0.0",
-    "zod": "^3.19.1"
+    "zod": "^3.20.2"
   },
   "devDependencies": {
     "@types/gamedig": "^4.0.0",
     "@types/glob": "^8.0.0",
     "@types/module-alias": "^2.0.1",
-    "@types/node": "^18.11.13",
+    "@types/node": "^18.11.16",
     "@types/node-schedule": "^2.1.0",
     "@types/uuid": "^9.0.0"
   },
