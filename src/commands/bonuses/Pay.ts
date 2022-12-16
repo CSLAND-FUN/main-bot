@@ -1,7 +1,7 @@
 import { Command, CommandCategory } from "@src/classes/Command";
+import { bold, Message } from "discord.js";
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
-import { bold, Message } from "discord.js";
 
 export = class PayCommand extends Command {
   constructor() {

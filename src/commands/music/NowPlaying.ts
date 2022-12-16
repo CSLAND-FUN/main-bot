@@ -1,6 +1,6 @@
 import { Command, CommandCategory } from "@src/classes/Command";
-import DiscordBot from "@src/classes/Discord";
 import { bold, hyperlink, Message } from "discord.js";
+import DiscordBot from "@src/classes/Discord";
 
 export = class NowPlayingCommand extends Command {
   constructor() {

@@ -1,6 +1,6 @@
 import { Command, CommandCategory } from "@src/classes/Command";
-import DiscordBot from "@src/classes/Discord";
 import { bold, Message } from "discord.js";
+import DiscordBot from "@src/classes/Discord";
 
 export = class LobbyStayCommand extends Command {
   constructor() {
@@ -8,6 +8,7 @@ export = class LobbyStayCommand extends Command {
       category: CommandCategory.LOBBY,
       name: "lobby-stay",
 
+      aliases: ["l-stay"],
       description: "Оставляет лобби даже если его владелец покинул канал.",
     });
   }

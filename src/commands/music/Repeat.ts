@@ -1,6 +1,6 @@
+import { bold, Message, underscore } from "discord.js";
 import { Command, CommandCategory } from "@src/classes/Command";
 import DiscordBot from "@src/classes/Discord";
-import { bold, Message, underscore } from "discord.js";
 
 export = class RepeatCommand extends Command {
   constructor() {

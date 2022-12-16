@@ -1,6 +1,6 @@
 import { Command, CommandCategory } from "@src/classes/Command";
 import DiscordBot from "@src/classes/Discord";
-import { bold, Message } from "discord.js";
+import { APIEmbedField, bold, Message } from "discord.js";
 
 export = class HelpCommand extends Command {
   constructor() {
@@ -20,8 +20,7 @@ export = class HelpCommand extends Command {
     );
 
     const fields = this.getCommands(client, message);
-    // @ts-ignore
-    embed.addFields(fields);
+    embed.addFields(fields as APIEmbedField[]);
 
     return message.reply({
       embeds: [embed],
@@ -29,6 +28,7 @@ export = class HelpCommand extends Command {
   }
 
   getCommands(client: DiscordBot, message: Message) {
+    //? [Fields | Start]
     var BonusesField: { name?: string; value?: string; inline?: boolean } = {};
     var OtherField: { name?: string; value?: string; inline?: boolean } = {};
     var LobbysField: { name?: string; value?: string; inline?: boolean } = {};
@@ -42,60 +42,85 @@ export = class HelpCommand extends Command {
     ModerationField.name = "🛡️ Модерация";
     MusicField.name = "🎵 Музыка";
     OwnerField.name = "⚠️ Для разработчика";
+    //? [Fields | End]
 
+    //? [Bonus Commands | Start]
     const BonusOut = [];
-    for (const [, { data }] of client.commands.filter(
-      (c) => c.data.category === CommandCategory.BONUSES
-    )) {
+    const BonusCommands = client.commands
+      .filter((c) => c.data.category === CommandCategory.BONUSES)
+      .values();
+
+    for (const { data } of BonusCommands) {
       const aliases = data.aliases
         ? ` (${data.aliases.map((a) => `\`!${a}\``).join(" | ")})`
         : "";
 
       BonusOut.push(`\`!${data.name}\`${aliases} - ${bold(data.description)}`);
     }
+    //? [Bonus Commands | End]
 
+    //? [Other Commands | Start]
     const OtherOut = [];
-    for (const [, { data }] of client.commands.filter(
-      (c) => c.data.category === CommandCategory.OTHER
-    )) {
+    const OtherCommands = client.commands
+      .filter((c) => c.data.category === CommandCategory.OTHER)
+      .values();
+
+    for (const { data } of OtherCommands) {
       const aliases = data.aliases
         ? ` (${data.aliases.map((a) => `\`!${a}\``).join(" | ")})`
         : "";
 
       OtherOut.push(`\`!${data.name}\`${aliases} - ${bold(data.description)}`);
     }
+    //? [Bonus Commands | End]
 
+    //? [Lobbys Commands | Start]
     const LobbysOut = [];
-    for (const [, { data }] of client.commands.filter(
-      (c) => c.data.category === CommandCategory.LOBBY
-    )) {
+    const LobbysCommands = client.commands
+      .filter((c) => c.data.category === CommandCategory.LOBBY)
+      .values();
+
+    for (const { data } of LobbysCommands) {
       const aliases = data.aliases
         ? ` (${data.aliases.map((a) => `\`!${a}\``).join(" | ")})`
         : "";
 
       LobbysOut.push(`\`!${data.name}\`${aliases} - ${bold(data.description)}`);
     }
+    //? [Lobbys Commands | End]
 
+    //? [Moderation Commands | Start]
     const ModerationOut = [];
-    for (const [, { data }] of client.commands.filter(
-      (c) => c.data.category === CommandCategory.MODERATION
-    )) {
+    const ModerationCommands = client.commands
+      .filter((c) => c.data.category === CommandCategory.MODERATION)
+      .values();
+
+    for (const { data } of ModerationCommands) {
       ModerationOut.push(`\`!${data.name}\` - ${bold(data.description)}`);
     }
+    //? [Moderation Commands | End]
 
+    //? [Music Commands | Start]
     const MusicOut = [];
-    for (const [, { data }] of client.commands.filter(
-      (c) => c.data.category === CommandCategory.MUSIC
-    )) {
+    const MusicCommands = client.commands
+      .filter((c) => c.data.category === CommandCategory.MUSIC)
+      .values();
+
+    for (const { data } of MusicCommands) {
       MusicOut.push(`\`!${data.name}\` - ${bold(data.description)}`);
     }
+    //? [Music Commands | End]
 
+    //? [Owner Commands | Start]
     const OwnerOut = [];
-    for (const [, { data }] of client.commands.filter(
-      (c) => c.data.category === CommandCategory.OWNER
-    )) {
+    const OwnerCommands = client.commands
+      .filter((c) => c.data.category === CommandCategory.OWNER)
+      .values();
+
+    for (const { data } of OwnerCommands) {
       OwnerOut.push(`\`!${data.name}\` - ${bold(data.description)}`);
     }
+    //? [Owner Commands | End]
 
     BonusesField.value = BonusOut.join("\n");
     OtherField.value = OtherOut.join("\n");
@@ -104,7 +129,8 @@ export = class HelpCommand extends Command {
     MusicField.value = MusicOut.join("\n");
     OwnerField.value = OwnerOut.join("\n");
 
-    if (message.author.id === "852921856800718908") {
+    const owners = process.env.OWNERS.split(",");
+    if (owners.includes(message.author.id)) {
       return [
         BonusesField,
         OtherField,

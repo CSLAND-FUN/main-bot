@@ -1,6 +1,6 @@
 import { Command, CommandCategory } from "@src/classes/Command";
-import DiscordBot from "@src/classes/Discord";
 import { bold, Message } from "discord.js";
+import DiscordBot from "@src/classes/Discord";
 
 export = class LobbySizeCommand extends Command {
   constructor() {
@@ -8,6 +8,7 @@ export = class LobbySizeCommand extends Command {
       category: CommandCategory.LOBBY,
       name: "lobby-size",
 
+      aliases: ["l-size"],
       description: "Меняет лимит участников в лобби (0 чтобы убрать лимит).",
     });
   }

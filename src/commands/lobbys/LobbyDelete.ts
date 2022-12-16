@@ -1,6 +1,6 @@
 import { Command, CommandCategory } from "@src/classes/Command";
-import DiscordBot from "@src/classes/Discord";
 import { bold, Message } from "discord.js";
+import DiscordBot from "@src/classes/Discord";
 
 export = class LobbyDeleteCommand extends Command {
   constructor() {
@@ -8,7 +8,8 @@ export = class LobbyDeleteCommand extends Command {
       category: CommandCategory.LOBBY,
       name: "lobby-delete",
 
-      description: "Удалит лобби после выхода владельца из него.",
+      aliases: ["l-del", "l-delete"],
+      description: "Удалит ли лобби после выхода владельца из него.",
     });
   }
 

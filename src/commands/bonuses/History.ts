@@ -1,8 +1,8 @@
+import { bold, EmbedBuilder, Message, time } from "discord.js";
 import { HistoryType, UserHistoryItem } from "@modules/bonuses";
 import { Command, CommandCategory } from "@src/classes/Command";
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
-import { bold, EmbedBuilder, Message, time } from "discord.js";
 
 export = class HistoryCommand extends Command {
   constructor() {

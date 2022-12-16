@@ -1,6 +1,6 @@
+import { bold, Message, TextChannel } from "discord.js";
 import { Command, CommandCategory } from "@src/classes/Command";
 import DiscordBot from "@src/classes/Discord";
-import { bold, Message, TextChannel } from "discord.js";
 
 export = class ClearCommand extends Command {
   constructor() {
@@ -15,7 +15,12 @@ export = class ClearCommand extends Command {
 
   async run(client: DiscordBot, message: Message, args: string[]) {
     const amount = args[0];
-    if (!amount || !Number(amount) || (amount as any as number) > 100) {
+    if (
+      !amount ||
+      !Number(amount) ||
+      (amount as any as number) > 100 ||
+      (amount as any as number) < 1
+    ) {
       const embed = this.embed(
         "Red",
         bold("Укажите количество сообщений (число до 100)!"),

@@ -1,6 +1,6 @@
 import { Command, CommandCategory } from "@src/classes/Command";
-import DiscordBot from "@src/classes/Discord";
 import { bold, Message } from "discord.js";
+import DiscordBot from "@src/classes/Discord";
 
 export = class PayCommand extends Command {
   constructor() {
@@ -8,7 +8,7 @@ export = class PayCommand extends Command {
       category: CommandCategory.BONUSES,
       name: "transfer",
 
-      description: "__ПОЛНОСТЬЮ__ передаёт бонусы.",
+      description: "__ПОЛНОСТЬЮ__ передаёт ваши бонусы.",
     });
   }
 

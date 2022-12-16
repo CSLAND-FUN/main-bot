@@ -1,7 +1,7 @@
 import { Command, CommandCategory } from "@src/classes/Command";
-import DiscordBot from "@src/classes/Discord";
 import { bold, codeBlock, Message } from "discord.js";
 import { inspect } from "util";
+import DiscordBot from "@src/classes/Discord";
 
 export = class EvalCommand extends Command {
   constructor() {
