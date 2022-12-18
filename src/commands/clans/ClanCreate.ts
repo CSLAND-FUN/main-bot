@@ -45,8 +45,21 @@ export = class ClanCreateCommand extends Command {
       35
     );
 
+    const clans = await client.clans.getClans();
     emitter.once(`gotAnswer-clan_name`, async (name) => {
       clan_name = name;
+
+      if (clans.find((x) => x.name === clan_name)) {
+        const embed = this.embed(
+          "Red",
+          bold("Клан с таким названием уже существует!"),
+          "❌"
+        );
+
+        return message.reply({
+          embeds: [embed],
+        });
+      }
 
       await this.waitForAnswer(
         "clan_description",
@@ -67,6 +80,18 @@ export = class ClanCreateCommand extends Command {
 
         emitter.once("gotAnswer-clan_tag", async (tag) => {
           clan_tag = tag;
+
+          if (clans.find((x) => x.tag === tag)) {
+            const embed = this.embed(
+              "Red",
+              bold("Клан с таким тегом уже существует!"),
+              "❌"
+            );
+
+            return message.reply({
+              embeds: [embed],
+            });
+          }
 
           const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
             new ButtonBuilder()

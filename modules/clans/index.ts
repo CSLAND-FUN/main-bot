@@ -68,7 +68,7 @@ export class ClanSystem {
       };
     }
 
-    const id = uuid();
+    const id = uuid().slice(0, 8);
     await this.sql<Clan>("clans").insert({
       id: id,
 

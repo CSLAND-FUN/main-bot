@@ -22,24 +22,19 @@ export = class ClanJoinCommand extends Command {
     }
 
     const _clans = await client.clans.getClans();
-    const owner = message.mentions.members.first();
-    if (!owner) {
-      const embed = this.embed(
-        "Red",
-        bold("Упомяните владельца клана для вступления!"),
-        "❌"
-      );
-
+    const id = args[0];
+    if (!id) {
+      const embed = this.embed("Red", bold("Укажите ID клана!"), "❌");
       return message.reply({
         embeds: [embed],
       });
     }
 
-    const clan = _clans.find((x) => x.owner === owner.id);
+    const clan = _clans.find((x) => x.id === id);
     if (!clan) {
       const embed = this.embed(
         "Red",
-        bold("Не удалось найти клан с таким владельцем!"),
+        bold("Не удалось найти клан с таким ID!"),
         "❌"
       );
 
