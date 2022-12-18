@@ -34,6 +34,7 @@ export = class HelpCommand extends Command {
     var LobbysField: { name?: string; value?: string; inline?: boolean } = {};
     var ModerationField: { name?: string; value?: string; inline?: boolean } = {}; // prettier-ignore
     var MusicField: { name?: string; value?: string; inline?: boolean } = {};
+    var ClansField: { name?: string; value?: string; inline?: boolean } = {};
     var OwnerField: { name?: string; value?: string; inline?: boolean } = {};
 
     BonusesField.name = "🪙 Система Бонусов";
@@ -41,6 +42,7 @@ export = class HelpCommand extends Command {
     LobbysField.name = "🔊 Конфигурация лобби";
     ModerationField.name = "🛡️ Модерация";
     MusicField.name = "🎵 Музыка";
+    ClansField.name = "⚔ Кланы";
     OwnerField.name = "⚠️ Для разработчика";
     //? [Fields | End]
 
@@ -96,7 +98,13 @@ export = class HelpCommand extends Command {
       .values();
 
     for (const { data } of ModerationCommands) {
-      ModerationOut.push(`\`!${data.name}\` - ${bold(data.description)}`);
+      const aliases = data.aliases
+        ? ` (${data.aliases.map((a) => `\`!${a}\``).join(" | ")})`
+        : "";
+
+      ModerationOut.push(
+        `\`!${data.name}\`${aliases} - ${bold(data.description)}`
+      );
     }
     //? [Moderation Commands | End]
 
@@ -107,9 +115,28 @@ export = class HelpCommand extends Command {
       .values();
 
     for (const { data } of MusicCommands) {
-      MusicOut.push(`\`!${data.name}\` - ${bold(data.description)}`);
+      const aliases = data.aliases
+        ? ` (${data.aliases.map((a) => `\`!${a}\``).join(" | ")})`
+        : "";
+
+      MusicOut.push(`\`!${data.name}\`${aliases} - ${bold(data.description)}`);
     }
     //? [Music Commands | End]
+
+    //? [Clans Commands | Start]
+    const ClansOut = [];
+    const ClansCommands = client.commands
+      .filter((c) => c.data.category === CommandCategory.CLANS)
+      .values();
+
+    for (const { data } of ClansCommands) {
+      const aliases = data.aliases
+        ? ` (${data.aliases.map((a) => `\`!${a}\``).join(" | ")})`
+        : "";
+
+      ClansOut.push(`\`!${data.name}\`${aliases} - ${bold(data.description)}`);
+    }
+    //? [Clans Commands | End]
 
     //? [Owner Commands | Start]
     const OwnerOut = [];
@@ -118,7 +145,11 @@ export = class HelpCommand extends Command {
       .values();
 
     for (const { data } of OwnerCommands) {
-      OwnerOut.push(`\`!${data.name}\` - ${bold(data.description)}`);
+      const aliases = data.aliases
+        ? ` (${data.aliases.map((a) => `\`!${a}\``).join(" | ")})`
+        : "";
+
+      OwnerOut.push(`\`!${data.name}\`${aliases} - ${bold(data.description)}`);
     }
     //? [Owner Commands | End]
 
@@ -127,6 +158,7 @@ export = class HelpCommand extends Command {
     LobbysField.value = LobbysOut.join("\n");
     ModerationField.value = ModerationOut.join("\n");
     MusicField.value = MusicOut.join("\n");
+    ClansField.value = ClansOut.join("\n");
     OwnerField.value = OwnerOut.join("\n");
 
     const owners = process.env.OWNERS.split(",");
@@ -135,8 +167,9 @@ export = class HelpCommand extends Command {
         BonusesField,
         OtherField,
         LobbysField,
-        MusicField,
         ModerationField,
+        MusicField,
+        ClansField,
         OwnerField,
       ];
     } else {
@@ -144,8 +177,9 @@ export = class HelpCommand extends Command {
         BonusesField,
         OtherField,
         LobbysField,
-        MusicField,
         ModerationField,
+        ClansField,
+        MusicField,
       ];
     }
   }

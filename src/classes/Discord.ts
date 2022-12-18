@@ -7,6 +7,7 @@ import { LobbysSystem } from "@modules/lobbys";
 import { DisTube, StreamType } from "distube";
 import { SpotifyPlugin } from "@distube/spotify";
 import { DeezerPlugin } from "@distube/deezer";
+import { ClanSystem } from "@modules/clans";
 
 export = class DiscordBot extends Client {
   constructor() {
@@ -39,6 +40,7 @@ export = class DiscordBot extends Client {
     this.events = new Collection();
 
     this.bonuses = new BonusSystem(this);
+    this.clans = new ClanSystem(this);
     this.lobbys = new LobbysSystem(
       this,
       process.env.LOBBYS_CATEGORY_ID,

@@ -10,6 +10,7 @@ export enum CommandCategory {
   MODERATION = "MODERATION",
   MUSIC = "MUSIC",
   OWNER = "OWNER",
+  CLANS = "CLANS",
 }
 
 export class Command {

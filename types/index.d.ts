@@ -4,6 +4,7 @@ import { Command } from "@src/classes/Command";
 import { Event } from "@src/classes/Event";
 
 import { BonusSystem } from "@modules/bonuses";
+import { ClanSystem } from "@modules/clans";
 import { LobbysSystem } from "@modules/lobbys";
 
 import { DisTube } from "distube";
@@ -15,6 +16,7 @@ declare module "discord.js" {
     events: Collection<string, Event>;
 
     bonuses: BonusSystem;
+    clans: ClanSystem;
     lobbys: LobbysSystem;
 
     player: DisTube;
