@@ -1,8 +1,8 @@
 import { Event } from "@src/classes/Event";
 
 import { GuildMember } from "discord.js";
-import DiscordBot from "@src/classes/Discord";
 import { ClanMember } from "@modules/clans";
+import DiscordBot from "@src/classes/Discord";
 
 export = class GuildMemberUpdateEvent extends Event {
   constructor() {
@@ -28,20 +28,35 @@ export = class GuildMemberUpdateEvent extends Event {
           .finally();
 
         const tag = `[${clan.tag}] `;
+
         if (
           !oldMember.displayName.includes(tag) &&
           newMember.displayName.includes(tag) &&
           !clan_member.length
         ) {
           const nickname = newMember.displayName.replace(tag, "");
-          return await newMember.edit({
+          await newMember.edit({
             nick: nickname,
           });
+
+          return;
+        } else if (
+          oldMember.displayName.includes(tag) &&
+          newMember.displayName.includes(tag) &&
+          !clan_member.length
+        ) {
+          const nickname = newMember.displayName.replace(tag, "");
+          await newMember.edit({
+            nick: nickname,
+          });
+
+          return;
         }
       }
     }
 
     const clan = await client.clans.getUserClan(newMember.id);
+    if (!clan) return;
 
     const oldNickname = oldMember.displayName;
     const newNickname = newMember.displayName;

@@ -4,8 +4,9 @@
   ? Есть 4 типа возможных подарков:
   ? - Бонусы;
   ? - Ваучер на деньги;
-  ? - Ваучер на скидку;
+  ? - Ваучер на скидку | Редкий подарок;
   ? - Промокод на скидку [промокод - одноразовый ваучер];
+  ? - Ключ на привилегию | Очень редкий подарок;
 
   ? Подарок определяется путём случайного выбора.
 */
@@ -16,7 +17,25 @@ import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
 
 import { FormData, request } from "undici";
+import Knex from "knex";
 import random from "random";
+
+const knex = Knex<Key>({
+  client: "mysql",
+  connection: {
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASS,
+    database: process.env.MYSQL_DATA,
+  },
+});
+
+type Key = {
+  server: string;
+  key: string;
+  used: 0 | 1;
+  days: number;
+};
 
 const ms = 86400000;
 
@@ -54,7 +73,14 @@ export = class NewYearCommand extends Command {
     }
 
     const give_bonuses = random.int(0, 1) === 0 ? false : true;
-    const random_choose = [1, 1, 1, 2, 3, 3, 3];
+    // prettier-ignore
+    const random_choose = [
+      1, 1, 1, 1, //? Ваучер на деньги
+      2, 2, //? Ваучер на скидку
+      3, 3, 3, 3, 3, //? Промокод на одноразовую скидку
+      4 //? Ключ на привилегию
+    ];
+
     const pick =
       give_bonuses === false
         ? random_choose[Math.floor(Math.random() * random_choose.length)]
@@ -69,6 +95,98 @@ export = class NewYearCommand extends Command {
         value = random.int(10, 20); //? От 10 до 20%
       } else if (pick === 3) {
         value = random.int(15, 30); //? От 15 до 30%
+      } else if (pick === 4) {
+        const keys = await knex("newyear_keys")
+          .select()
+          .where({
+            used: 0,
+          })
+          .finally();
+
+        const key = keys[Math.floor(Math.random() * keys.length)];
+        const embed = this.embed(
+          "DarkPurple",
+          bold(
+            [
+              `В качестве новогоднего подарка вы получили ключ на привилегию!`,
+              `Ваша награда будет отправлена в личные сообщения!`,
+            ].join("\n")
+          ),
+          "🎁"
+        );
+
+        message.reply({
+          embeds: [embed],
+        });
+
+        const word = Functions.declOfNum(key.days, ["день", "дня", "дней"]);
+        const to_user = this.embed(
+          "DarkPurple",
+          bold(
+            [
+              `Вот ваша награда - ключ на привилегию!`,
+              `› Сервер: ${key.server}`,
+              `› Ключ: ${key.key}`,
+              `› На: ${key.days} ${word}`,
+            ].join("\n")
+          ),
+          "🎁"
+        );
+
+        try {
+          await message.author.send({
+            embeds: [to_user],
+          });
+        } catch (e) {
+          const embed = this.embed(
+            "Red",
+            bold(
+              `У меня не получилось отправить вам сообщение в ЛС, упомяните скриптера для получения подарка!`
+            ),
+            "❌"
+          );
+
+          return message.channel.send({
+            content: message.author.toString(),
+            embeds: [embed],
+          });
+        }
+
+        const info_embed = this.embed(
+          "DarkPurple",
+          bold(
+            [
+              `› Пользователь: ${message.author.toString()}`,
+              `› Сервер: ${key.server}`,
+              `› Ключ: ${key.key}`,
+              `› На: ${key.days} ${word}`,
+            ].join("\n")
+          )
+        );
+
+        const channel = message.guild.channels.cache.get(
+          process.env.NOTIFICATIONS_CHANNEL_ID
+        ) as TextChannel;
+
+        channel.send({
+          embeds: [info_embed],
+        });
+
+        await knex("newyear_keys")
+          .update({
+            used: 1,
+          })
+          .where({
+            key: key.key,
+          });
+
+        await client.bonuses.update(
+          message.author.id,
+          "newyear_used",
+          Date.now().toString()
+        );
+
+        return;
       }
 
       const form = new FormData();
@@ -166,6 +284,12 @@ export = class NewYearCommand extends Command {
       channel.send({
         embeds: [info_embed],
       });
+
+      await client.bonuses.update(
+        message.author.id,
+        "newyear_used",
+        Date.now().toString()
+      );
 
       return;
     }

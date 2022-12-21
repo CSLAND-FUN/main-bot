@@ -1,6 +1,7 @@
 import { Command, CommandCategory } from "@src/classes/Command";
 import { Message, bold } from "discord.js";
 import DiscordBot from "@src/classes/Discord";
+import { ClanInvite } from "@modules/clans";
 
 export = class ClanJoinCommand extends Command {
   constructor() {
@@ -44,10 +45,39 @@ export = class ClanJoinCommand extends Command {
     }
 
     if (clan.type === 0) {
+      const invite = await client.clans
+        .sql<ClanInvite>("clans_invites")
+        .select()
+        .where({
+          userID: message.author.id,
+        })
+        .finally();
+
+      if (invite.length) {
+        const embed = this.embed(
+          "Red",
+          bold("Вы уже подали заявку на вступление в клан!"),
+          "❌"
+        );
+
+        return message.reply({
+          embeds: [embed],
+        });
+      }
+
+      await client.clans
+        .sql<ClanInvite>("clans_invites")
+        .insert({
+          clanID: clan.id,
+          userID: message.author.id,
+          date: new Date(),
+        })
+        .finally();
+
       const embed = this.embed(
-        "Red",
-        bold("Клан закрыт, в него вступить нельзя!"),
-        "❌"
+        "DarkPurple",
+        bold("Вы подали заявку на вступление в клан, ожидайте!"),
+        "✅"
       );
 
       return message.reply({

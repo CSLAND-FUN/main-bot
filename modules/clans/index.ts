@@ -22,6 +22,14 @@ export interface ClanMember {
   joinedAt: Date;
 }
 
+export interface ClanInvite {
+  id: number;
+
+  clanID: string;
+  userID: string;
+  date: Date;
+}
+
 export class ClanSystem {
   public client: DiscordBot;
   public sql: Knex;
@@ -179,6 +187,35 @@ export class ClanSystem {
         id: _clan[0].clanID,
       });
 
+    const newClan = await this.sql<Clan>("clans")
+      .select()
+      .where({
+        id: _clan[0].clanID,
+      })
+      .finally();
+
+    if (newClan[0].members < 1) {
+      await this.sql<Clan>("clans")
+        .delete()
+        .where({
+          id: newClan[0].id,
+        })
+        .finally();
+    } else {
+      if (clan[0].owner === member) {
+        const members = await this.sql<ClanMember>("clans_members")
+          .select()
+          .finally();
+
+        const random = members[Math.floor(Math.random() * members.length)];
+        await this.sql<Clan>("clans")
+          .update({
+            owner: random.id,
+          })
+          .finally();
+      }
+    }
+
     return {
       status: true,
       message: "Вы успешно вышли из клана!",
@@ -211,6 +248,8 @@ export class ClanSystem {
         id: member,
       })
       .finally();
+
+    if (!clan_member.length) return null;
 
     const clans = await this.sql<Clan>("clans")
       .select()
@@ -248,6 +287,19 @@ export class ClanSystem {
         table.string("clanID", 255).notNullable();
         table.string("id", 255).notNullable();
         table.date("joinedAt").notNullable();
+
+        return table;
+      }
+    );
+
+    const invites_table_name = "clans_invites";
+    await this.sql.schema.createTableIfNotExists(
+      invites_table_name,
+      (table) => {
+        table.increments("id");
+        table.string("userID", 255).notNullable();
+        table.string("clanID", 255).notNullable();
+        table.date("date").notNullable();
 
         return table;
       }

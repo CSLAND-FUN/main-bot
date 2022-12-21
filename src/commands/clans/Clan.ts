@@ -1,6 +1,7 @@
-import { Command, CommandCategory } from "@src/classes/Command";
 import { Message, bold, userMention } from "discord.js";
+import { Command, CommandCategory } from "@src/classes/Command";
 import DiscordBot from "@src/classes/Discord";
+import { ClanInvite } from "@modules/clans";
 
 export = class ClanCommand extends Command {
   constructor() {
@@ -38,14 +39,23 @@ export = class ClanCommand extends Command {
       1: "Открытый",
     };
 
+    const invites = await client.clans
+      .sql<ClanInvite>("clans_invites")
+      .select()
+      .where({
+        clanID: clan.id,
+      })
+      .finally();
+
     const data = [
-      bold(`${clan.name} | [${clan.tag}]`),
+      bold(`› Название клана: ${clan.name}`),
+      bold(`› Тег клана: [${clan.tag}]`),
       bold(`› Тип клана: ${TYPES[clan.type]}`),
       bold(`› Описание: ${clan.description}`),
       bold(`› Участников: ${clan.members}`),
       bold(`› Владелец: ${userMention(clan.owner)}`),
       bold(`› Место в топе: ${index}`),
-      "\n",
+      invites.length ? bold(`› Заявок на вступление: ${invites.length}`) : "",
     ].join("\n");
 
     const embed = this.embed("DarkPurple", data);
