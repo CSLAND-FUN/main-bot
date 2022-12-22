@@ -8,8 +8,11 @@ import { DisTube, StreamType } from "distube";
 import { SpotifyPlugin } from "@distube/spotify";
 import { DeezerPlugin } from "@distube/deezer";
 import { ClanSystem } from "@modules/clans";
+import knex, { Knex } from "knex";
 
 export = class DiscordBot extends Client {
+  public sql: Knex;
+
   constructor() {
     super({
       intents: [
@@ -64,10 +67,34 @@ export = class DiscordBot extends Client {
         filter: "audioonly",
       },
     });
+
+    this.sql = knex({
+      client: "mysql",
+      connection: {
+        host: process.env.MYSQL_HOST,
+        user: process.env.MYSQL_USER,
+        password: process.env.MYSQL_PASS,
+        database: process.env.MYSQL_DATA,
+      },
+    });
   }
 
   async start() {
     new Handler(this).loadAll();
+
+    const voice_table_exists = await this.sql.schema.hasTable("voice_stats");
+    if (!voice_table_exists) {
+      await this.sql.schema.createTable("voice_stats", (table) => {
+        table.string("channel_name", 255).notNullable();
+        table.string("channel_id", 255).notNullable();
+        table.string("userID", 255).notNullable();
+
+        table.integer("times", 255).notNullable();
+        table.string("date", 10).notNullable();
+
+        return table;
+      });
+    }
 
     await this.login(process.env.BOT_TOKEN);
   }

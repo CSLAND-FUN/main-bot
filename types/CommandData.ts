@@ -8,6 +8,7 @@ export interface CommandData {
   description?: string;
   aliases?: string[];
   ownerOnly?: boolean;
+  cooldown?: number;
 
   permissions?: PermissionsString[];
 }

@@ -64,7 +64,7 @@ export = class ClanInvitesCommand extends Command {
           bold(`› Пользователь: ${member.toString()}`),
           bold(`› Дата подачи: ${date}`),
           bold(`› Принять заявку: \`!clan-accept ${invite.id}\``),
-          "\n",
+          "",
         ].join("\n")
       );
     }

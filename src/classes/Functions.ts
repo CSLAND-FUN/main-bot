@@ -1,3 +1,4 @@
+import { EmbedAuthorData, Message } from "discord.js";
 import { z } from "zod";
 
 export = {
@@ -30,5 +31,15 @@ export = {
     }
 
     return arg as number;
+  },
+
+  getAuthor: (message: Message): EmbedAuthorData => {
+    return {
+      name: message.author.tag,
+      iconURL: message.author.displayAvatarURL({
+        forceStatic: true,
+        size: 2048,
+      }),
+    };
   },
 };

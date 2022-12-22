@@ -264,45 +264,58 @@ export class ClanSystem {
 
   private async tables() {
     const clans_table_name = "clans";
-    await this.sql.schema.createTableIfNotExists(clans_table_name, (table) => {
-      table.string("id", 255).notNullable();
+    const clans_table_exists = await this.sql.schema.hasTable(clans_table_name);
+    if (!clans_table_exists) {
+      await this.sql.schema.createTable(clans_table_name, (table) => {
+        table.string("id", 255).notNullable();
 
-      table.string("name", 50).notNullable();
-      table.string("description", 150).notNullable().defaultTo("Без описания");
-      table.string("tag", 15).notNullable().defaultTo("-");
+        table.string("name", 50).notNullable();
+        table
+          .string("description", 150)
+          .notNullable()
+          .defaultTo("Без описания");
 
-      table.integer("type", 1).notNullable().defaultTo(1);
+        table.string("tag", 15).notNullable().defaultTo("-");
 
-      table.string("owner").notNullable();
-      table.integer("members").notNullable().defaultTo(1);
-      table.date("createdAt").notNullable();
+        table.integer("type", 1).notNullable().defaultTo(1);
 
-      return table;
-    });
+        table.string("owner").notNullable();
+        table.integer("members").notNullable().defaultTo(1);
+        table.date("createdAt").notNullable();
+
+        return table;
+      });
+    }
 
     const members_table_name = "clans_members";
-    await this.sql.schema.createTableIfNotExists(
-      members_table_name,
-      (table) => {
-        table.string("clanID", 255).notNullable();
-        table.string("id", 255).notNullable();
-        table.date("joinedAt").notNullable();
+    const members_table_exists = await this.sql.schema.hasTable(members_table_name); // prettier-ignore
+    if (!members_table_exists) {
+      await this.sql.schema.createTableIfNotExists(
+        members_table_name,
+        (table) => {
+          table.string("clanID", 255).notNullable();
+          table.string("id", 255).notNullable();
+          table.date("joinedAt").notNullable();
 
-        return table;
-      }
-    );
+          return table;
+        }
+      );
+    }
 
     const invites_table_name = "clans_invites";
-    await this.sql.schema.createTableIfNotExists(
-      invites_table_name,
-      (table) => {
-        table.increments("id");
-        table.string("userID", 255).notNullable();
-        table.string("clanID", 255).notNullable();
-        table.date("date").notNullable();
+    const invites_table_exists = await this.sql.schema.hasTable(invites_table_name) // prettier-ignore
+    if (!invites_table_exists) {
+      await this.sql.schema.createTableIfNotExists(
+        invites_table_name,
+        (table) => {
+          table.increments("id");
+          table.string("userID", 255).notNullable();
+          table.string("clanID", 255).notNullable();
+          table.date("date").notNullable();
 
-        return table;
-      }
-    );
+          return table;
+        }
+      );
+    }
   }
 }

@@ -236,7 +236,21 @@ export class LobbysSystem {
           }
         }
       } else if (left) {
-        await this.check_and_delete(oldState, newState);
+        const _channel = this.cache.get(oldState.channel.id);
+        if (!_channel) return;
+
+        const channel = newState.guild.channels.cache.get(oldState.channel.id);
+        if (!channel.isVoiceBased()) return;
+
+        if (
+          oldState.member.id === _channel.owner &&
+          _channel.options.deleteIfOwnerLeaves === true
+        ) {
+          await channel.delete("Владелец вышел из канала");
+          this.cache.delete(channel.id);
+
+          return;
+        }
       } else if (switched) {
         var category = newState.channel.parent.id === this.category_id;
         var parent = newState.channel.id === this.parent_id;
@@ -279,23 +293,5 @@ export class LobbysSystem {
       type: ChannelType.GuildVoice,
       parent: this.category_id,
     });
-  }
-
-  private async check_and_delete(oldState: VoiceState, newState: VoiceState) {
-    const _channel = this.cache.get(oldState.channel.id);
-    if (!_channel) return;
-
-    const channel = newState.guild.channels.cache.get(oldState.channel.id);
-    if (!channel.isVoiceBased()) return;
-
-    if (
-      oldState.member.id === _channel.owner &&
-      _channel.options.deleteIfOwnerLeaves === true
-    ) {
-      await channel.delete("Владелец вышел из канала");
-      this.cache.delete(channel.id);
-
-      return;
-    }
   }
 }

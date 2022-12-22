@@ -20,6 +20,7 @@ export class Command {
     this.data = data;
 
     this.data.description = this.data.description ?? "Без описания.";
+    this.data.cooldown = this.data.cooldown ?? null;
   }
 
   run(client: DiscordBot, message: Message, args: string[]) {

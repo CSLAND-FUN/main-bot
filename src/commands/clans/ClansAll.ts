@@ -81,7 +81,7 @@ export = class ClansAllCommand extends Command {
           bold(`› Участников: ${clan.members}`),
           bold(`› Владелец: ${userMention(clan.owner)}`),
           bold(`› Для вступления: \`!clan-join ${clan.id}\``),
-          "\n",
+          "",
         ].join("\n");
       })
       .join("\n");
@@ -137,7 +137,7 @@ export = class ClansAllCommand extends Command {
                 bold(`› Участников: ${clan.members}`),
                 bold(`› Владелец: ${userMention(clan.owner)}`),
                 bold(`› Для вступления: \`!clan-join ${clan.id}\``),
-                "\n",
+                "",
               ].join("\n");
             })
             .join("\n");
@@ -182,7 +182,7 @@ export = class ClansAllCommand extends Command {
                 bold(`› Участников: ${clan.members}`),
                 bold(`› Владелец: ${userMention(clan.owner)}`),
                 bold(`› Для вступления: \`!clan-join ${clan.id}\``),
-                "\n",
+                "",
               ].join("\n");
             })
             .join("\n");

@@ -11,6 +11,7 @@ export = class BonusCommand extends Command {
       name: "bonus",
 
       description: "Даёт еженедельный бонус.",
+      cooldown: 10000,
     });
   }
 
