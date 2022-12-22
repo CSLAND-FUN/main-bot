@@ -46,7 +46,7 @@ export = class NewYearCommand extends Command {
       name: "newyear",
 
       description: "Ежедневная новогодняя раздача в течение Нового Года.",
-      cooldown: 10000,
+      cooldown: 30000,
     });
   }
 
