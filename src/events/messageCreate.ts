@@ -52,8 +52,11 @@ export = class MessageCreateEvent extends Event {
       return;
     }
 
-    if (command.data.cooldown !== null && timestamps.has(message.author.id)) {
-      const data = timestamps.get(message.author.id);
+    if (
+      command.data.cooldown !== null &&
+      timestamps.has(`${command.data.name}-${message.author.id}`)
+    ) {
+      const data = timestamps.get(`${command.data.name}-${message.author.id}`);
       const _time = Math.ceil(data.next_use / 1000);
 
       const embed = new EmbedBuilder();
@@ -72,13 +75,13 @@ export = class MessageCreateEvent extends Event {
     if (command.data.cooldown !== null) {
       await command.run(client, message, args);
 
-      timestamps.set(message.author.id, {
+      timestamps.set(`${command.data.name}-${message.author.id}`, {
         time: command.data.cooldown,
         next_use: Date.now() + command.data.cooldown,
       });
 
       setTimeout(() => {
-        timestamps.delete(message.author.id);
+        timestamps.delete(`${command.data.name}-${message.author.id}`);
       }, command.data.cooldown);
 
       return;
