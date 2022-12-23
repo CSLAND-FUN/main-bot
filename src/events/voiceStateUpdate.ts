@@ -55,7 +55,10 @@ export = class VoiceStateUpdateEvent extends Event {
         .sql<VoiceInformation>("voice_stats")
         .insert({
           channel_id: newState.channel.id,
-          channel_name: newState.channel.name,
+          channel_name: newState.channel.name
+            .replace("👤┇", "")
+            .replace("🎮┇", ""),
+
           userID: newState.member.id,
 
           times: 1,
@@ -68,21 +71,39 @@ export = class VoiceStateUpdateEvent extends Event {
         "Voice Stats"
       );
     } else {
-      await client
-        .sql<VoiceInformation>("voice_stats")
-        .update({
-          times: data[0].times + 1,
-        })
-        .where({
-          channel_id: newState.channel.id,
-          userID: newState.member.id,
-        })
-        .finally();
+      if (oldState.channel === null && newState.channel !== null) {
+        await client
+          .sql<VoiceInformation>("voice_stats")
+          .update({
+            times: data[0].times + 1,
+          })
+          .where({
+            channel_id: newState.channel.id,
+            userID: newState.member.id,
+          })
+          .finally();
 
-      Logger.log(
-        `Updated statistics for ${newState.member.user.tag}.`,
-        "[Voice Stats]"
-      );
+        Logger.log(
+          `Updated statistics for ${newState.member.user.tag}.`,
+          "[Voice Stats]"
+        );
+      } else if (oldState.channel !== null && newState.channel !== null) {
+        await client
+          .sql<VoiceInformation>("voice_stats")
+          .update({
+            times: data[0].times + 1,
+          })
+          .where({
+            channel_id: newState.channel.id,
+            userID: newState.member.id,
+          })
+          .finally();
+
+        Logger.log(
+          `Updated statistics for ${newState.member.user.tag}.`,
+          "[Voice Stats]"
+        );
+      }
     }
   }
 };
