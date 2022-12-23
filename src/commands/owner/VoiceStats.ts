@@ -24,13 +24,19 @@ export = class VoiceStatsCommand extends Command {
   }
 
   async run(client: DiscordBot, message: Message, args: string[]) {
-    const date = new Date();
-    const day = Number(String(date.getDate()).padStart(2, "0")) - 1;
+    const date = new Date()
+      .toLocaleString("ru", {
+        timeZone: "Europe/Moscow",
+      })
+      .slice(0, 10)
+      .replaceAll(".", "-")
+      .split("-");
 
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
+    const day = date[0];
+    const month = date[1];
+    const year = date[2];
+
     const format = `${year}-${month}-${day}`;
-
     const data = await client
       .sql<VoiceInformation>("voice_stats")
       .select()
