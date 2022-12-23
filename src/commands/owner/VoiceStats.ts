@@ -55,21 +55,20 @@ export = class VoiceStatsCommand extends Command {
     await message.guild.members.fetch();
     for (const stat of data) {
       const _member = message.guild.members.cache.get(stat.userID);
-      const word = Functions.declOfNum(stat.times, ["раз", "раза"]);
+      const word = Functions.declOfNum(stat.times, ["раз", "раза", "раз"]);
 
       const member = `${_member.toString()} \`(${_member.user.tag})\``;
       const channel = `\`${stat.channel_name} (${stat.channel_id})\``;
       const times = `\`${stat.times} ${word}\``;
 
-      stats.push(
-        bold(`› ${member}\n› ${channel}\n› ${times}`),
-        "",
-        "— — — — — — — — — — — — — — —",
-        ""
-      );
+      stats.push(bold(`› ${member}\n» ${channel}\n» ${times}`));
     }
 
-    const embed = this.embed("DarkPurple", stats.join("\n"));
+    const embed = this.embed(
+      "DarkPurple",
+      stats.join("\n— — — — — — — — — — — — — — —\n")
+    );
+
     return message.reply({
       embeds: [embed],
     });

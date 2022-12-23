@@ -18,9 +18,15 @@ export = class VoiceStateUpdateEvent extends Event {
   }
 
   async run(client: DiscordBot, oldState: VoiceState, newState: VoiceState) {
+    if (
+      (!oldState.channel && !newState.channel) ||
+      (oldState.channel && !newState.channel)
+    ) {
+      return;
+    }
+
     if (oldState.member.user.bot || newState.member.user.bot) return;
-    if (!oldState.channel && !newState.channel) return;
-    if (oldState.channel && !newState.channel) return;
+    if (newState.channel.id === process.env.LOBBYS_PARENT_ID) return;
 
     const data = await client
       .sql<VoiceInformation>("voice_stats")
@@ -32,13 +38,19 @@ export = class VoiceStateUpdateEvent extends Event {
       .finally();
 
     if (!data.length) {
-      const date = new Date();
-      const day = Number(String(date.getDate()).padStart(2, "0"));
+      const date = new Date()
+        .toLocaleString("ru", {
+          timeZone: "Europe/Moscow",
+        })
+        .slice(0, 10)
+        .replaceAll(".", "-")
+        .split("-");
 
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
+      const day = date[0];
+      const month = date[1];
+      const year = date[2];
+
       const format = `${year}-${month}-${day}`;
-
       await client
         .sql<VoiceInformation>("voice_stats")
         .insert({
