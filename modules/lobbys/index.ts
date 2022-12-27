@@ -204,11 +204,11 @@ export class LobbysSystem {
       var switched = oldState.channel !== null && newState.channel !== null;
 
       if (joined) {
-        var category = newState.channel.parent.id === this.category_id;
-        var parent = newState.channel.id === this.parent_id;
+        var is_category = newState.channel.parent.id === this.category_id;
+        var is_parent = newState.channel.id === this.parent_id;
 
-        if (category) {
-          if (parent) {
+        if (is_category) {
+          if (is_parent) {
             // prettier-ignore
             const cached = this.cache.find((x) => x.owner === newState.member.id);
             if (cached) return;
@@ -236,15 +236,15 @@ export class LobbysSystem {
           }
         }
       } else if (left) {
-        const _channel = this.cache.get(oldState.channel.id);
-        if (!_channel) return;
+        const cached = this.cache.get(oldState.channel.id);
+        if (!cached) return;
 
         const channel = newState.guild.channels.cache.get(oldState.channel.id);
         if (!channel.isVoiceBased()) return;
 
         if (
-          oldState.member.id === _channel.owner &&
-          _channel.options.deleteIfOwnerLeaves === true
+          newState.member.id === cached.owner &&
+          cached.options.deleteIfOwnerLeaves === true
         ) {
           await channel.delete("Владелец вышел из канала");
           this.cache.delete(channel.id);
@@ -252,11 +252,11 @@ export class LobbysSystem {
           return;
         }
       } else if (switched) {
-        var category = newState.channel.parent.id === this.category_id;
-        var parent = newState.channel.id === this.parent_id;
+        var new_is_category = newState.channel.parent.id === this.category_id;
+        var new_is_parent = newState.channel.id === this.parent_id;
 
-        if (category) {
-          if (parent) {
+        if (new_is_category) {
+          if (new_is_parent) {
             // prettier-ignore
             const cached = this.cache.find((x) => x.owner === newState.member.id);
             if (cached) return;
@@ -281,6 +281,25 @@ export class LobbysSystem {
               this.cache.delete(channel.id);
               await channel.delete();
             }
+
+            return;
+          }
+        } else {
+          const cached = this.cache.get(oldState.channel.id);
+          if (!cached) return;
+
+          // prettier-ignore
+          const channel = newState.guild.channels.cache.get(oldState.channel.id);
+          if (!channel.isVoiceBased()) return;
+
+          if (
+            newState.member.id === cached.owner &&
+            cached.options.deleteIfOwnerLeaves === true
+          ) {
+            await channel.delete("Владелец вышел из канала");
+            this.cache.delete(channel.id);
+
+            return;
           }
         }
       }
