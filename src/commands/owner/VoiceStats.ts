@@ -32,7 +32,7 @@ export = class VoiceStatsCommand extends Command {
       .replaceAll(".", "-")
       .split("-");
 
-    const day = date[0];
+    const day = Number(date[0]) - 1;
     const month = date[1];
     const year = date[2];
 

@@ -18,6 +18,8 @@ export = class VoiceStateUpdateEvent extends Event {
   }
 
   async run(client: DiscordBot, oldState: VoiceState, newState: VoiceState) {
+    if (oldState.member.user.bot || newState.member.user.bot) return;
+    if (newState.channel.id === process.env.LOBBYS_PARENT_ID) return;
     if (
       (!oldState.channel && !newState.channel) ||
       (oldState.channel && !newState.channel)
@@ -25,9 +27,16 @@ export = class VoiceStateUpdateEvent extends Event {
       return;
     }
 
-    if (oldState.member.user.bot || newState.member.user.bot) return;
-    if (newState.channel.id === process.env.LOBBYS_PARENT_ID) return;
+    if (!oldState.channel && newState.channel) {
+      await this.count(client, oldState, newState);
+      return;
+    } else if (oldState.channel && newState.channel) {
+      await this.count(client, oldState, newState);
+      return;
+    }
+  }
 
+  async count(client: DiscordBot, oldState: VoiceState, newState: VoiceState) {
     const data = await client
       .sql<VoiceInformation>("voice_stats")
       .select()
