@@ -1,5 +1,5 @@
 import { Command, CommandCategory } from "@src/classes/Command";
-import { bold, Message } from "discord.js";
+import { bold, Message, time } from "discord.js";
 import DiscordBot from "@src/classes/Discord";
 
 const ms = 604800000;
@@ -20,14 +20,15 @@ export = class BonusCommand extends Command {
     const next_time = Number(data.bonus_used) + ms;
 
     if (data.bonus_used !== null && Date.now() < next_time) {
-      // prettier-ignore
-      const date = new Date(next_time).toLocaleString("ru", { timeZone: "Europe/Moscow" });
+      const date = time(new Date(next_time));
+      const date_r = time(new Date(next_time), "R");
+
       const embed = this.embed(
         "Red",
         bold(
           [
             `Бонус можно получать раз в неделю!`,
-            `Попробуйте ещё раз ${date}`,
+            `Попробуйте ещё раз ${date} (${date_r})`,
           ].join("\n")
         ),
         "❌"

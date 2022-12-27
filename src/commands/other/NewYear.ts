@@ -11,7 +11,7 @@
   ? Подарок определяется путём случайного выбора.
 */
 
-import { bold, Message, TextChannel } from "discord.js";
+import { bold, Message, TextChannel, time } from "discord.js";
 import { Command, CommandCategory } from "@src/classes/Command";
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
@@ -55,14 +55,15 @@ export = class NewYearCommand extends Command {
     const next_time = Number(data.newyear_used) + ms;
 
     if (data.newyear_used !== null && Date.now() < next_time) {
-      // prettier-ignore
-      const date = new Date(next_time).toLocaleString("ru", { timeZone: "Europe/Moscow" });
+      const date = time(new Date(next_time));
+      const date_r = time(new Date(next_time), "R");
+
       const embed = this.embed(
         "Red",
         bold(
           [
             `Вы уже получили ежедневный новогодний бонус!`,
-            `Ждём вас ${date}`,
+            `Ждём вас ${date} (${date_r})`,
           ].join("\n")
         ),
         "❌"

@@ -19,6 +19,12 @@ export = class MessageCreateEvent extends Event {
   async run(client: DiscordBot, message: Message) {
     if (!message.inGuild() || message.author.bot) return;
     if (!message.content.startsWith("!")) return;
+
+    /* 
+
+    ? Disabled due to some problems.
+    ? If you need this part, you can uncomment it.
+    
     if (
       ![
         process.env.TEST_CHANNEL_ID,
@@ -29,6 +35,7 @@ export = class MessageCreateEvent extends Event {
     ) {
       return;
     }
+    */
 
     const args = message.content.slice("!".length).trim().split(" ");
     const cmd = args.shift().toLowerCase();
