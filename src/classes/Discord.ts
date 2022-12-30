@@ -1,8 +1,8 @@
 import { ActivityType, Client, Collection } from "discord.js";
 import Handler from "./Handler";
 
-import { BonusSystem } from "@modules/bonuses";
 import { LobbysSystem } from "@modules/lobbys";
+import { BonusSystem } from "@modules/bonuses";
 import { ClanSystem } from "@modules/clans";
 import knex, { Knex } from "knex";
 

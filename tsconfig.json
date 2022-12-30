@@ -1,17 +1,11 @@
 {
   "compilerOptions": {
+    "moduleResolution": "Node",
     "target": "ESNext",
     "module": "CommonJS",
     "strict": false,
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "sourceMap": false,
-    "declaration": false,
-    "outDir": "dist/",
+
+    "outDir": "build",
     "baseUrl": ".",
     "paths": {
       "@src/*": ["src/*"],
@@ -19,9 +13,19 @@
       "@cfgs/*": ["configs/*"]
     },
 
-    "types": ["./types/"],
-    "typeRoots": ["./node_modules/@types", "./types"]
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "declaration": false,
+    "sourceMap": false,
+    "pretty": true,
+
+    "typeRoots": ["./types"],
+    "types": ["./types/"]
   },
+
   "include": ["src", "modules", "configs"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "types"]
 }

@@ -22,3 +22,5 @@ declare module "discord.js" {
     player: DisTube;
   }
 }
+
+import "./enviroment";

@@ -1,7 +1,23 @@
-import { ColorResolvable, EmbedBuilder, Message } from "discord.js";
-import { CommandData } from "../../types/CommandData";
+import {
+  ColorResolvable,
+  EmbedBuilder,
+  Message,
+  PermissionsString,
+} from "discord.js";
 import DiscordBot from "./Discord";
 import Logger from "./Logger";
+
+interface CommandData {
+  category: CommandCategory;
+  name: string;
+
+  description?: string;
+  aliases?: string[];
+  ownerOnly?: boolean;
+  cooldown?: number;
+
+  permissions?: PermissionsString[];
+}
 
 export enum CommandCategory {
   LOBBY = "LOBBY",

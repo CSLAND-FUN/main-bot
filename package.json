@@ -9,7 +9,7 @@
     "@discordjs/opus": "^0.9.0",
     "@discordjs/voice": "^0.14.0",
     "@distube/deezer": "^1.0.0",
-    "@distube/spotify": "^1.4.5",
+    "@distube/spotify": "^1.5.1",
     "discord.js": "^14.7.1",
     "distube": "^4.0.4",
     "dotenv": "^16.0.3",
@@ -30,18 +30,20 @@
     "@types/gamedig": "^4.0.0",
     "@types/glob": "^8.0.0",
     "@types/module-alias": "^2.0.1",
-    "@types/node": "^18.11.16",
+    "@types/node": "^18.11.18",
     "@types/node-schedule": "^2.1.0",
     "@types/uuid": "^9.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:watch": "tsc -p tsconfig.json -w",
+    "modules": "ncu -u",
+    "production": "cd dist/src && node starter.js --production",
+    "development": "cd src && ts-node starter.ts --dev-mode"
   },
   "_moduleAliases": {
     "@src": "src",
     "@modules": "modules",
     "@cfgs": "configs"
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "production": "cd dist/src && node starter.js --production",
-    "development": "cd src && ts-node starter.ts --dev-mode"
   }
 }
