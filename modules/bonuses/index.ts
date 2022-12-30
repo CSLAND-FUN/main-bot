@@ -71,7 +71,6 @@ export class BonusSystem {
     this.users = new Collection();
 
     this.tables();
-    this.checker();
     this.handle();
 
     //? Check Database Users every 5 minutes.
@@ -554,23 +553,29 @@ export class BonusSystem {
     }
   }
 
-  private async checker() {
+  async checker() {
     const guild = this.client.guilds.cache.get(process.env.SERVER_ID);
     if (!guild) return;
 
-    const all_user_ids = await this.knex<BonusUser>("bonus_users")
-      .select("id")
+    const data = await this.knex<BonusUser>("bonus_users")
+      .select()
+      .where({
+        counting: 1,
+      })
       .finally();
 
-    for (const id in all_user_ids) {
-      const member = guild.members.cache.get(id);
+    for (const user of data) {
+      const member = guild.members.cache.get(user.id);
       if (!member) continue;
 
-      const data = await this.data(id);
+      const data = await this.data(user.id);
       if (data.counting !== 1) continue;
 
-      await this.update(id, "counting", 0);
-      Logger.log(`Stopped counting for ${id} due to bot restart.`, "Bonuses");
+      await this.update(user.id, "counting", 0);
+      Logger.log(
+        `Stopped counting for ${user.id} due to bot restart.`,
+        "Bonuses"
+      );
     }
   }
 }

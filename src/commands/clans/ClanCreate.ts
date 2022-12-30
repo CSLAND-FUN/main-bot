@@ -144,7 +144,7 @@ export = class ClanCreateCommand extends Command {
       embeds: [embed],
     });
 
-    const nickname = message.member.displayName;
+    const nickname = message.member.user.username;
     return await message.member.edit({
       nick: `[${clan_tag}] ${nickname}`,
     });

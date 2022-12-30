@@ -2,7 +2,6 @@ import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  ChannelType,
   ComponentType,
   EmbedBuilder,
   escapeMarkdown,
@@ -100,7 +99,7 @@ export = class PlaySongEvent extends Event<false, true> {
   async handleButtons(client: DiscordBot, message: Message, song: Song) {
     const collector = await message.createMessageComponentCollector({
       componentType: ComponentType.Button,
-      time: 2147483647,
+      time: song.duration * 1000,
 
       filter: (int) => {
         const ids = [
@@ -123,7 +122,6 @@ export = class PlaySongEvent extends Event<false, true> {
     collector.on("collect", (int) => {
       if (!int.isButton()) return;
 
-      //?
       if (int.customId.includes("resume-button")) {
         const queue = client.player.getQueue(int.guild.id);
         if (!queue) {

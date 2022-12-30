@@ -57,7 +57,11 @@ export = class ClanInvitesCommand extends Command {
     await message.guild.members.fetch();
     for (const invite of invites) {
       const member = message.guild.members.cache.get(invite.userID);
-      const date = invite.date.toLocaleString("ru").slice(0, 10);
+      const date = invite.date
+        .toLocaleString("ru", {
+          timeZone: "Europe/Moscow",
+        })
+        .slice(0, 10);
 
       data.push(
         [

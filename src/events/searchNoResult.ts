@@ -1,6 +1,6 @@
-import DiscordBot from "@src/classes/Discord";
-import { Event } from "@src/classes/Event";
 import { Message } from "discord.js";
+import { Event } from "@src/classes/Event";
+import DiscordBot from "@src/classes/Discord";
 
 export = class SearchNoResultEvent extends Event<false, true> {
   constructor() {

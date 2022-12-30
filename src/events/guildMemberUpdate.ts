@@ -16,25 +16,25 @@ export = class GuildMemberUpdateEvent extends Event {
   ) {
     const old_isInClan = await client.clans.isInClan(oldMember.id);
     const new_isInClan = await client.clans.isInClan(newMember.id);
-    if (!old_isInClan || !new_isInClan) {
+    if (!old_isInClan && !new_isInClan) {
       const clans = await client.clans.getClans();
       for (const clan of clans) {
-        const clan_member = await client.clans
+        const is_member = await client.clans
           .sql<ClanMember>("clans_members")
           .select()
           .where({
+            clanID: clan.id,
             id: newMember.id,
           })
           .finally();
 
         const tag = `[${clan.tag}] `;
-
         if (
           !oldMember.displayName.includes(tag) &&
           newMember.displayName.includes(tag) &&
-          !clan_member.length
+          !is_member.length
         ) {
-          const nickname = newMember.displayName.replace(tag, "");
+          const nickname = newMember.user.username.replace(tag, "");
           await newMember.edit({
             nick: nickname,
           });
@@ -43,9 +43,9 @@ export = class GuildMemberUpdateEvent extends Event {
         } else if (
           oldMember.displayName.includes(tag) &&
           newMember.displayName.includes(tag) &&
-          !clan_member.length
+          !is_member.length
         ) {
-          const nickname = newMember.displayName.replace(tag, "");
+          const nickname = newMember.user.username.replace(tag, "");
           await newMember.edit({
             nick: nickname,
           });
@@ -58,8 +58,8 @@ export = class GuildMemberUpdateEvent extends Event {
     const clan = await client.clans.getUserClan(newMember.id);
     if (!clan) return;
 
-    const oldNickname = oldMember.displayName;
-    const newNickname = newMember.displayName;
+    const oldNickname = oldMember.user.username;
+    const newNickname = newMember.user.username;
 
     const clanTag = `[${clan.tag}] `;
     if (oldNickname.includes(clanTag) && !newNickname.includes(clanTag)) {

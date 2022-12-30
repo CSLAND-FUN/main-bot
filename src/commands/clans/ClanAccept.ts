@@ -97,7 +97,7 @@ export = class ClanAcceptCommand extends Command {
       });
 
       const member = message.guild.members.cache.get(invites[0].userID);
-      const nickname = member.displayName;
+      const nickname = member.user.username;
       await member.edit({
         nick: `[${clan.tag}] ${nickname}`,
       });

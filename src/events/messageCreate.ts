@@ -1,8 +1,8 @@
 import { EmbedBuilder, Message, bold } from "discord.js";
 import { Event } from "@src/classes/Event";
+import { time } from "discord.js";
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
-import { time } from "discord.js";
 
 type TimestampUser = {
   time: number;
@@ -17,26 +17,15 @@ export = class MessageCreateEvent extends Event {
   }
 
   async run(client: DiscordBot, message: Message) {
-    if (!message.inGuild() || message.author.bot) return;
-    if (!message.content.startsWith("!")) return;
-
-    /* 
-
-    ? Disabled due to some problems.
-    ? If you need this part, you can uncomment it.
-    
     if (
-      ![
-        process.env.TEST_CHANNEL_ID,
-        process.env.COMMANDS_CHANNEL_ID,
-        process.env.SETTINGS_CHANNEL_ID,
-        process.env.NEWS_CHANNEL_ID,
-      ].includes(message.channel.id)
+      !message.inGuild() ||
+      message.guild.id !== process.env.SERVER_ID ||
+      message.author.bot
     ) {
       return;
     }
-    */
 
+    if (!message.content.startsWith("!")) return;
     const args = message.content.slice("!".length).trim().split(" ");
     const cmd = args.shift().toLowerCase();
 

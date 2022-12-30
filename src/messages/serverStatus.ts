@@ -1,8 +1,7 @@
-import DiscordBot from "@src/classes/Discord";
-import Logger from "@src/classes/Logger";
-import getServers from "@src/functions/getServers";
-
 import { EmbedBuilder, Message, TextChannel } from "discord.js";
+import DiscordBot from "@src/classes/Discord";
+import getServers from "@src/functions/getServers";
+import Logger from "@src/classes/Logger";
 
 export default async function serverStatus(client: DiscordBot) {
   Logger.log("Initialized ServerStatus Message!", "CSLAND");

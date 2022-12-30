@@ -11,8 +11,9 @@ export = class ReadyEvent extends Event {
   }
 
   async run(client: DiscordBot) {
-    Logger.log(`${client.user.tag} is started!`);
+    await client.bonuses.checker();
 
+    Logger.log(`${client.user.tag} is started!`);
     await serverStatus(client);
   }
 };

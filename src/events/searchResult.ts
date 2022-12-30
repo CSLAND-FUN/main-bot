@@ -1,13 +1,13 @@
-import DiscordBot from "@src/classes/Discord";
-import { Event } from "@src/classes/Event";
 import {
   ActionRowBuilder,
   bold,
   Message,
-  SelectMenuBuilder,
+  StringSelectMenuBuilder,
   TextChannel,
 } from "discord.js";
 import { SearchResult, SearchResultVideo } from "distube";
+import { Event } from "@src/classes/Event";
+import DiscordBot from "@src/classes/Discord";
 
 export = class SearchResultEvent extends Event<false, true> {
   constructor() {
@@ -30,8 +30,8 @@ export = class SearchResultEvent extends Event<false, true> {
       return [r.id, `[${r.uploader.name}] ${r.name}`];
     });
 
-    const row = new ActionRowBuilder<SelectMenuBuilder>();
-    const builder = new SelectMenuBuilder();
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>();
+    const builder = new StringSelectMenuBuilder();
     builder.setCustomId("results-select-menu");
     builder.setPlaceholder("Выберите один вариант из возможных.");
     builder.setMinValues(1);
