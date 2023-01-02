@@ -30,9 +30,7 @@ export = class BlacklistCommand extends Command {
     client.bonuses.blacklist(member.id, reason);
     const embed = this.embed(
       "DarkPurple",
-      bold(
-        `Вы заблокировали пользователю ${member.toString()} доступ системе Бонусов!`
-      ),
+      bold(`Вы заблокировали пользователя ${member.toString()}!`),
       "✅"
     );
 

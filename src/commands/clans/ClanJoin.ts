@@ -1,7 +1,7 @@
 import { Command, CommandCategory } from "@src/classes/Command";
 import { Message, bold } from "discord.js";
-import DiscordBot from "@src/classes/Discord";
 import { ClanInvite } from "@modules/clans";
+import DiscordBot from "@src/classes/Discord";
 
 export = class ClanJoinCommand extends Command {
   constructor() {
@@ -14,6 +14,19 @@ export = class ClanJoinCommand extends Command {
   }
 
   async run(client: DiscordBot, message: Message, args: string[]) {
+    const blacklisted = await client.bonuses.isBlacklisted(message);
+    if (blacklisted === true) {
+      const embed = this.embed(
+        "Red",
+        bold("Вы находитесь в чёрном списке!"),
+        "❌"
+      );
+
+      return message.reply({
+        embeds: [embed],
+      });
+    }
+
     const isInClan = await client.clans.isInClan(message.author.id);
     if (isInClan) {
       const embed = this.embed("Red", bold("Вы уже состоите в клане!"), "❌");

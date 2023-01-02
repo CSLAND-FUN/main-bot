@@ -380,6 +380,12 @@ export class BonusSystem {
     return out.join("\n");
   }
 
+  async isBlacklisted(message: Message) {
+    const data = await this.data(message.author.id);
+    if (data.blacklisted === 1) return true;
+    else return false;
+  }
+
   private handle() {
     Logger.log("Creating Handler for Client#voiceStateUpdate Event", "Bonuses");
     this.client.on("voiceStateUpdate", async (oldState, newState) => {

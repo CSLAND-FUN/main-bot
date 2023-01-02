@@ -28,9 +28,7 @@ export = class WhitelistCommand extends Command {
     client.bonuses.whitelist(member.id);
     const embed = this.embed(
       "DarkPurple",
-      bold(
-        `Вы вернули пользователю ${member.toString()} доступ системе Бонусов!`
-      ),
+      bold(`Вы разблокировали пользователя ${member.toString()}!`),
       "✅"
     );
 

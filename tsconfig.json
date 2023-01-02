@@ -20,12 +20,12 @@
     "skipLibCheck": true,
     "declaration": false,
     "sourceMap": false,
-    "pretty": true,
+    // "pretty": true,
 
     "typeRoots": ["./types"],
     "types": ["./types/"]
   },
 
-  "include": ["src", "modules", "configs"],
-  "exclude": ["node_modules", "types"]
+  "exclude": ["node_modules", "types", "scripts"],
+  "include": ["src", "modules", "configs"]
 }

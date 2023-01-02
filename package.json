@@ -32,11 +32,11 @@
     "@types/module-alias": "^2.0.1",
     "@types/node": "^18.11.18",
     "@types/node-schedule": "^2.1.0",
-    "@types/uuid": "^9.0.0"
+    "@types/uuid": "^9.0.0",
+    "prettier": "^2.8.1"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "build:watch": "tsc -p tsconfig.json -w",
+    "build": "ts-node scripts/build.ts",
     "modules": "ncu -u",
     "production": "cd dist/src && node starter.js --production",
     "development": "cd src && ts-node starter.ts --dev-mode"

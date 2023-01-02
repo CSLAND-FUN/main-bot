@@ -54,13 +54,12 @@ export = class MessageCreateEvent extends Event {
     ) {
       const data = timestamps.get(`${command.data.name}-${message.author.id}`);
       const _time = Math.ceil(data.next_use / 1000);
+      const text = bold(`❌ | Используйте команду ещё раз ${time(_time, "R")}`);
 
       const embed = new EmbedBuilder();
       embed.setColor("Red");
       embed.setAuthor(Functions.getAuthor(message));
-      embed.setDescription(
-        bold(`❌ | Используйте команду ещё раз ${time(_time, "R")}`)
-      );
+      embed.setDescription(text);
       embed.setTimestamp();
 
       return message.reply({

@@ -24,6 +24,19 @@ export = class ShopCommand extends Command {
   }
 
   async run(client: DiscordBot, message: Message, args: string[]) {
+    const blacklisted = await client.bonuses.isBlacklisted(message);
+    if (blacklisted === true) {
+      const embed = this.embed(
+        "Red",
+        bold("Вы находитесь в чёрном списке!"),
+        "❌"
+      );
+
+      return message.reply({
+        embeds: [embed],
+      });
+    }
+
     const data = await client.bonuses.data(message.author.id);
 
     const bronzeData = ROLES[0];
