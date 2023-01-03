@@ -205,6 +205,9 @@ export class ClanSystem {
       if (clan[0].owner === member) {
         const members = await this.sql<ClanMember>("clans_members")
           .select()
+          .where({
+            clanID: clan[0].id,
+          })
           .finally();
 
         const random = members[Math.floor(Math.random() * members.length)];
@@ -260,6 +263,32 @@ export class ClanSystem {
 
     if (clans.length) return clans[0];
     else return null;
+  }
+
+  async resetOwners() {
+    const clans = await this.sql<Clan>("clans").select().finally();
+    for (const clan of clans) {
+      const members = await this.sql<ClanMember>("clans_members")
+        .select()
+        .where({
+          clanID: clan.id,
+        })
+        .finally();
+
+      const random = members[Math.floor(Math.random() * members.length)];
+      await this.sql<Clan>("clans")
+        .update({
+          owner: random.id,
+        })
+        .where({
+          id: clan.id,
+        });
+    }
+
+    return {
+      status: true,
+      message: "Владельцы кланов были успешно переопределены!",
+    };
   }
 
   private async tables() {

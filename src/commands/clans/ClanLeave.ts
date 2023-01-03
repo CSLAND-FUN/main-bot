@@ -58,7 +58,7 @@ export = class ClanLeaveCommand extends Command {
     const nickname = message.member.nickname;
     if (nickname.includes(`[${clan.tag}] `)) {
       await message.member.edit({
-        nick: nickname,
+        nick: nickname.replace(`[${clan.tag}] `, ""),
       });
 
       return;
