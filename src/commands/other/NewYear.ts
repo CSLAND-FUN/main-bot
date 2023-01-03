@@ -27,6 +27,7 @@ export = class NewYearCommand extends Command {
       name: "newyear",
 
       description: "Ежедневная новогодняя раздача в течение Нового Года.",
+      cooldown: 30000,
     });
   }
 
@@ -179,6 +180,12 @@ export = class NewYearCommand extends Command {
       channel.send({
         embeds: [info_embed],
       });
+
+      await client.bonuses.update(
+        message.author.id,
+        "newyear_used",
+        Date.now().toString()
+      );
 
       return;
     }
