@@ -18,39 +18,57 @@ export = class GuildMemberUpdateEvent extends Event {
     const new_isInClan = await client.clans.isInClan(newMember.id);
     if (!old_isInClan && !new_isInClan) {
       const clans = await client.clans.getClans();
-      for (const clan of clans) {
-        const is_member = await client.clans
-          .sql<ClanMember>("clans_members")
-          .select()
-          .where({
-            clanID: clan.id,
-            id: newMember.id,
-          })
-          .finally();
 
-        const tag = `[${clan.tag}] `;
-        if (
-          !oldMember.displayName.includes(tag) &&
-          newMember.displayName.includes(tag) &&
-          !is_member.length
-        ) {
-          const nickname = newMember.user.username.replace(tag, "");
+      const regexp = /\[(.*?)\]/gm;
+      const tag = regexp.test(newMember.nickname);
+      if (tag) {
+        const clan = clans.find((x) => {
+          const matched = newMember.nickname.match(regexp);
+          return x.tag === matched[0].replaceAll("[", "").replaceAll("]", "");
+        });
+
+        if (!clan) {
           await newMember.edit({
-            nick: nickname,
+            nick: newMember.user.username,
           });
 
           return;
-        } else if (
-          oldMember.displayName.includes(tag) &&
-          newMember.displayName.includes(tag) &&
-          !is_member.length
-        ) {
-          const nickname = newMember.user.username.replace(tag, "");
-          await newMember.edit({
-            nick: nickname,
-          });
+        } else {
+          for (const clan of clans) {
+            const is_member = await client.clans
+              .sql<ClanMember>("clans_members")
+              .select()
+              .where({
+                clanID: clan.id,
+                id: newMember.id,
+              })
+              .finally();
 
-          return;
+            const tag = `[${clan.tag}] `;
+            if (
+              !oldMember.displayName.includes(tag) &&
+              newMember.displayName.includes(tag) &&
+              !is_member.length
+            ) {
+              const nickname = newMember.user.username;
+              await newMember.edit({
+                nick: nickname,
+              });
+
+              return;
+            } else if (
+              oldMember.displayName.includes(tag) &&
+              newMember.displayName.includes(tag) &&
+              !is_member.length
+            ) {
+              const nickname = newMember.user.username;
+              await newMember.edit({
+                nick: nickname,
+              });
+
+              return;
+            }
+          }
         }
       }
     }
