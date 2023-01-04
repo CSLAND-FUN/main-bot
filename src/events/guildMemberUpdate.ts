@@ -1,7 +1,5 @@
-import { Event } from "@src/classes/Event";
-
 import { GuildMember } from "discord.js";
-import { ClanMember } from "@modules/clans";
+import { Event } from "@src/classes/Event";
 import DiscordBot from "@src/classes/Discord";
 
 export = class GuildMemberUpdateEvent extends Event {
@@ -14,57 +12,67 @@ export = class GuildMemberUpdateEvent extends Event {
     oldMember: GuildMember,
     newMember: GuildMember
   ) {
-    const old_isInClan = await client.clans.isInClan(oldMember.id);
-    const new_isInClan = await client.clans.isInClan(newMember.id);
-    if (!old_isInClan && !new_isInClan) {
+    const _isInClan = await client.clans.isInClan(newMember.id);
+    if (!_isInClan) {
       const clans = await client.clans.getClans();
-
       const regexp = /\[(.*?)\]/gm;
-      const tag = regexp.test(newMember.nickname);
-      if (tag) {
+      const includes_tag = regexp.test(newMember.nickname);
+
+      if (includes_tag) {
         const clan = clans.find((x) => {
-          const matched = newMember.nickname.match(regexp);
-          return x.tag === matched[0].replaceAll("[", "").replaceAll("]", "");
+          const tag = newMember.nickname
+            .match(regexp)[0]
+            .replaceAll("[", "")
+            .replaceAll("]", "");
+
+          return x.tag === tag;
         });
 
         if (!clan) {
-          await newMember.edit({
-            nick: newMember.user.username,
-          });
+          try {
+            await newMember.edit({
+              nick: newMember.user.username,
+            });
+          } catch (error) {
+            client.logger.error(
+              `Cannot remove Clan Tag from user ${newMember.user.tag}`,
+              "evt:guildMemberUpdate"
+            );
+          }
 
           return;
         } else {
           for (const clan of clans) {
-            const is_member = await client.clans
-              .sql<ClanMember>("clans_members")
-              .select()
-              .where({
-                clanID: clan.id,
-                id: newMember.id,
-              })
-              .finally();
-
             const tag = `[${clan.tag}] `;
-            if (
-              !oldMember.displayName.includes(tag) &&
-              newMember.displayName.includes(tag) &&
-              !is_member.length
-            ) {
-              const nickname = newMember.user.username;
-              await newMember.edit({
-                nick: nickname,
-              });
+            const is_member = await client.clans.isInClan(
+              newMember.id,
+              clan.id
+            );
+
+            if (is_member && !newMember.nickname.includes(tag)) {
+              try {
+                await newMember.edit({
+                  nick: tag + newMember.user.username,
+                });
+              } catch (error) {
+                client.logger.error(
+                  `Cannot add Clan Tag to user ${newMember.user.tag}`,
+                  "evt:guildMemberUpdate"
+                );
+              }
 
               return;
-            } else if (
-              oldMember.displayName.includes(tag) &&
-              newMember.displayName.includes(tag) &&
-              !is_member.length
-            ) {
-              const nickname = newMember.user.username;
-              await newMember.edit({
-                nick: nickname,
-              });
+            } else if (!is_member && newMember.nickname.includes(tag)) {
+              try {
+                await newMember.edit({
+                  nick: newMember.user.username,
+                });
+              } catch (error) {
+                client.logger.error(
+                  `Cannot remove Clan Tag from user ${newMember.user.tag}`,
+                  "evt:guildMemberUpdate"
+                );
+              }
 
               return;
             }
@@ -73,17 +81,24 @@ export = class GuildMemberUpdateEvent extends Event {
       }
     }
 
+    const isInClan = await client.clans.isInClan(newMember.id);
+    if (!isInClan) return;
+
     const clan = await client.clans.getUserClan(newMember.id);
     if (!clan) return;
 
-    const oldNickname = oldMember.user.username;
-    const newNickname = newMember.user.username;
-
     const clanTag = `[${clan.tag}] `;
-    if (oldNickname.includes(clanTag) && !newNickname.includes(clanTag)) {
-      await newMember.edit({
-        nick: `[${clan.tag}] ${newMember.displayName}`,
-      });
+    if (!newMember.nickname.includes(clanTag)) {
+      try {
+        await newMember.edit({
+          nick: clanTag + newMember.user.username,
+        });
+      } catch (error) {
+        client.logger.error(
+          `Cannot add Clan Tag to user ${newMember.user.tag}`,
+          "evt:guildMemberUpdate"
+        );
+      }
 
       return;
     }

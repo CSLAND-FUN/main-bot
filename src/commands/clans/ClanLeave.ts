@@ -57,9 +57,16 @@ export = class ClanLeaveCommand extends Command {
 
     const nickname = message.member.displayName;
     if (nickname.includes(`[${clan.tag}] `)) {
-      await message.member.edit({
-        nick: nickname.replace(`[${clan.tag}] `, ""),
-      });
+      try {
+        await message.member.edit({
+          nick: nickname.replace(`[${clan.tag}] `, ""),
+        });
+      } catch (error) {
+        client.logger.error(
+          `Cannot remove Clan Tag from user ${message.author.tag}`,
+          "cmd:clan-leave"
+        );
+      }
 
       return;
     }

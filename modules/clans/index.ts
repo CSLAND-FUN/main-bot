@@ -225,7 +225,17 @@ export class ClanSystem {
     };
   }
 
-  async isInClan(member: string) {
+  async isInClan(member: string, id?: string) {
+    if (id) {
+      const member_clan = await this.sql<ClanMember>("clans_members")
+        .select()
+        .where({ clanID: id })
+        .finally();
+
+      if (member_clan.length) return true;
+      else return false;
+    }
+
     const clans = await this.sql<Clan>("clans")
       .select()
       .where({

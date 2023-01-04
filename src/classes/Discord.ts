@@ -1,5 +1,6 @@
 import { ActivityType, Client, Collection } from "discord.js";
 import Handler from "./Handler";
+import Logger from "./Logger";
 
 import { LobbysSystem } from "@modules/lobbys";
 import { BonusSystem } from "@modules/bonuses";
@@ -12,6 +13,7 @@ import { DeezerPlugin } from "@distube/deezer";
 
 export = class DiscordBot extends Client {
   public sql: Knex;
+  public logger: typeof Logger;
 
   constructor() {
     super({
@@ -77,6 +79,8 @@ export = class DiscordBot extends Client {
         database: process.env.MYSQL_DATA,
       },
     });
+
+    this.logger = Logger;
   }
 
   async start() {

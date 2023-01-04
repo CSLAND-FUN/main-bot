@@ -111,9 +111,18 @@ export = class ClanJoinCommand extends Command {
       embeds: [embed],
     });
 
-    const nickname = message.member.user.username;
-    return await message.member.edit({
-      nick: `[${clan.tag}] ${nickname}`,
-    });
+    try {
+      const nickname = message.member.user.username;
+      await message.member.edit({
+        nick: `[${clan.tag}] ${nickname}`,
+      });
+    } catch (error) {
+      client.logger.error(
+        `Cannot add Clan Tag to user ${message.author.tag}`,
+        "cmd:clan-join"
+      );
+    }
+
+    return;
   }
 };
