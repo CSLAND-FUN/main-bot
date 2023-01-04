@@ -38,8 +38,7 @@ export = class ClanAcceptCommand extends Command {
     const clan = await client.clans.getUserClan(message.author.id);
     if (!clan) {
       const embed = this.embed("Red", bold("Клан не найден!"), "❌");
-      return message.channel.send({
-        content: message.author.toString(),
+      return message.reply({
         embeds: [embed],
       });
     }
@@ -51,8 +50,7 @@ export = class ClanAcceptCommand extends Command {
         "❌"
       );
 
-      return message.channel.send({
-        content: message.author.toString(),
+      return message.reply({
         embeds: [embed],
       });
     }
@@ -60,8 +58,7 @@ export = class ClanAcceptCommand extends Command {
     const id = args[0];
     if (!id) {
       const embed = this.embed("Red", bold("Укажите номер заявки!"), "❌");
-      return message.channel.send({
-        content: message.author.toString(),
+      return message.reply({
         embeds: [embed],
       });
     }
@@ -82,8 +79,7 @@ export = class ClanAcceptCommand extends Command {
         "❌"
       );
 
-      return message.channel.send({
-        content: message.author.toString(),
+      return message.reply({
         embeds: [embed],
       });
     }
@@ -109,11 +105,19 @@ export = class ClanAcceptCommand extends Command {
         embeds: [embed],
       });
 
-      const member = message.guild.members.cache.get(invites[0].userID);
-      const nickname = member.user.username;
-      await member.edit({
-        nick: `[${clan.tag}] ${nickname}`,
-      });
+      try {
+        const member = message.guild.members.cache.get(invites[0].userID);
+        const nickname = member.user.username;
+        await member.edit({
+          nick: `[${clan.tag}] ${nickname}`,
+        });
+      } catch (error) {
+        const member = message.guild.members.cache.get(invites[0].userID);
+        client.logger.error(
+          `Cannot add Clan Tag to user ${member.user.tag}`,
+          "cmd:clan-accept"
+        );
+      }
 
       return;
     }

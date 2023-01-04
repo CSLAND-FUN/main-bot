@@ -301,6 +301,27 @@ export class ClanSystem {
     };
   }
 
+  async transferOwnership(member: string, id: string) {
+    try {
+      await this.sql<Clan>("clans")
+        .update({
+          owner: member,
+        })
+        .where({ id: id })
+        .finally();
+    } catch (error) {
+      return {
+        status: false,
+        message: "Произошла неизвестная ошибка!",
+      };
+    }
+
+    return {
+      status: true,
+      message: "Права владением клана были успешно переданы!",
+    };
+  }
+
   private async tables() {
     const clans_table_name = "clans";
     const clans_table_exists = await this.sql.schema.hasTable(clans_table_name);

@@ -39,8 +39,7 @@ export = class ClanCommand extends Command {
     const clan = await client.clans.getUserClan(message.author.id);
     if (!clan) {
       const embed = this.embed("Red", bold("Клан не найден!"), "❌");
-      return message.channel.send({
-        content: message.author.toString(),
+      return message.reply({
         embeds: [embed],
       });
     }

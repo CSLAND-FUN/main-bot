@@ -3,13 +3,13 @@ import { Message, bold } from "discord.js";
 import { ClanInvite } from "@modules/clans";
 import DiscordBot from "@src/classes/Discord";
 
-export = class ClanInvitesCommand extends Command {
+export = class ClanOwnerCommand extends Command {
   constructor() {
     super({
       category: CommandCategory.CLANS,
-      name: "clan-invites",
+      name: "clan-owner",
 
-      description: "Получает заявки на вступление в клан.",
+      description: "Передаёт права владением клана другому пользователю.",
     });
   }
 
@@ -46,7 +46,7 @@ export = class ClanInvitesCommand extends Command {
     if (clan.owner !== message.author.id) {
       const embed = this.embed(
         "Red",
-        bold("Заявки на вступление может рассматривать только владелец клана!"),
+        bold("Только владелец клана может передавать свои права!"),
         "❌"
       );
 
@@ -55,36 +55,40 @@ export = class ClanInvitesCommand extends Command {
       });
     }
 
-    const invites = await client.clans
-      .sql<ClanInvite>("clans_invites")
-      .select()
-      .where({
-        clanID: clan.id,
-      })
-      .finally();
-
-    const data = [];
-
-    await message.guild.members.fetch();
-    for (const invite of invites) {
-      const member = message.guild.members.cache.get(invite.userID);
-      const date = invite.date
-        .toLocaleString("ru", {
-          timeZone: "Europe/Moscow",
-        })
-        .slice(0, 10);
-
-      data.push(
-        [
-          bold(`› Пользователь: ${member.toString()}`),
-          bold(`› Дата подачи: ${date}`),
-          bold(`› Принять заявку: \`!clan-accept ${invite.id}\``),
-          "",
-        ].join("\n")
+    const member = message.mentions.members.first();
+    if (!member) {
+      const embed = this.embed(
+        "Red",
+        bold("Упомяните участника для передачи прав!"),
+        "❌"
       );
+
+      return message.reply({
+        embeds: [embed],
+      });
     }
 
-    const embed = this.embed("DarkPurple", data.join("\n"));
+    if (member.user.bot) {
+      const embed = this.embed(
+        "Red",
+        bold("Владельцем клана не может быть бот!"),
+        "❌"
+      );
+
+      return message.reply({
+        embeds: [embed],
+      });
+    }
+
+    const result = await client.clans.transferOwnership(member.id, clan.id);
+    if (result.status !== true) {
+      const embed = this.embed("Red", bold(result.message), "❌");
+      return message.reply({
+        embeds: [embed],
+      });
+    }
+
+    const embed = this.embed("DarkPurple", bold(result.message), "✅");
     return message.reply({
       embeds: [embed],
     });
