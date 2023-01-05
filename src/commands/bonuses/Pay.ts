@@ -78,7 +78,7 @@ export = class PayCommand extends Command {
     const result = await client.bonuses.transfer(
       message.author.id,
       member.id,
-      Number(amount)
+      check
     );
 
     if ("message" in result) {

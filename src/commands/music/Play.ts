@@ -25,7 +25,34 @@ export = class PlayCommand extends Command {
       });
     }
 
+    if (
+      message.guild.members.me.voice.channel &&
+      message.guild.members.me.voice.channel.id !==
+        message.member.voice.channel.id
+    ) {
+      const embed = this.embed(
+        "Red",
+        bold("На текущий момент бот используется в другом Голосовом Канале!"),
+        "❌"
+      );
+
+      return message.reply({
+        embeds: [embed],
+      });
+    }
+
     const input = args.join(" ");
+    if (!input) {
+      const embed = this.embed(
+        "Red",
+        bold("Напишите название или ссылку на песню!"),
+        "❌"
+      );
+
+      return message.reply({
+        embeds: [embed],
+      });
+    }
 
     try {
       await client.player.play(message.member.voice.channel, input, {

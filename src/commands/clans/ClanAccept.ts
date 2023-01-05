@@ -2,6 +2,7 @@ import { Command, CommandCategory } from "@src/classes/Command";
 import { Message, bold } from "discord.js";
 import { ClanInvite } from "@modules/clans";
 import DiscordBot from "@src/classes/Discord";
+import Functions from "@src/classes/Functions";
 
 export = class ClanAcceptCommand extends Command {
   constructor() {
@@ -63,6 +64,14 @@ export = class ClanAcceptCommand extends Command {
       });
     }
 
+    const checker = Functions.checkNumber(Number(id), true);
+    if (typeof checker !== "number") {
+      const embed = this.embed("Red", bold(checker), "❌");
+      return message.reply({
+        embeds: [embed],
+      });
+    }
+
     const invites = await client.clans
       .sql<ClanInvite>("clans_invites")
       .select()
@@ -95,36 +104,36 @@ export = class ClanAcceptCommand extends Command {
 
     const result = await client.clans.joinClan(clan.id, invites[0].userID);
     if (result.status === true) {
-      const embed = this.embed(
-        "DarkPurple",
-        bold("Заявка была успешно принята"),
-        "✅"
-      );
-
-      message.reply({
+      const embed = this.embed("Red", bold(result.message), "❌");
+      return message.reply({
         embeds: [embed],
       });
-
-      try {
-        const member = message.guild.members.cache.get(invites[0].userID);
-        const nickname = member.user.username;
-        await member.edit({
-          nick: `[${clan.tag}] ${nickname}`,
-        });
-      } catch (error) {
-        const member = message.guild.members.cache.get(invites[0].userID);
-        client.logger.error(
-          `Cannot add Clan Tag to user ${member.user.tag}`,
-          "cmd:clan-accept"
-        );
-      }
-
-      return;
     }
 
-    const embed = this.embed("Red", bold(result.message), "❌");
-    return message.reply({
+    const embed = this.embed(
+      "DarkPurple",
+      bold("Заявка была успешно принята"),
+      "✅"
+    );
+
+    message.reply({
       embeds: [embed],
     });
+
+    try {
+      const member = message.guild.members.cache.get(invites[0].userID);
+      const nickname = member.user.username;
+      await member.edit({
+        nick: `[${clan.tag}] ${nickname}`,
+      });
+    } catch (error) {
+      const member = message.guild.members.cache.get(invites[0].userID);
+      client.logger.error(
+        `Cannot add Clan Tag to user ${member.user.tag}`,
+        "cmd:clan-accept"
+      );
+    }
+
+    return;
   }
 };

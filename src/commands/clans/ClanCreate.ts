@@ -120,46 +120,52 @@ export = class ClanCreateCommand extends Command {
       40
     );
 
-    var clan_type: number = null;
-    buttonEmitter.once("gotButton-clan_type", async (type) => {
-      if (type === "closed") {
-        clan_type = 0;
-        return;
-      } else if (type === "for_everyone") {
-        clan_type = 1;
-        return;
-      }
+    buttonEmitter.once("noButtonCollcted-clan_type", () => {
+      const embed = this.embed(
+        "Red",
+        bold("Не был получен ответ, процесс отменён!"),
+        "❌"
+      );
+
+      return message.reply({
+        embeds: [embed],
+      });
     });
 
-    while (clan_type === null) {
-      await this.sleep(100);
-    }
+    buttonEmitter.once("gotButton-clan_type", async (type) => {
+      const result = await client.clans.createClan(
+        message.author.id,
+        clan_name,
+        clan_description,
+        clan_tag,
+        type === "closed" ? 0 : 1
+      );
 
-    const result = await client.clans.createClan(
-      message.author.id,
-      clan_name,
-      clan_description,
-      clan_tag,
-      clan_type
-    );
+      if (result.status !== true) {
+        const embed = this.embed("Red", bold(result.message), "❌");
+        return message.channel.send({
+          content: message.author.toString(),
+          embeds: [embed],
+        });
+      }
 
-    if (result.status !== true) {
-      const embed = this.embed("Red", bold(result.message), "❌");
-      return message.channel.send({
+      const embed = this.embed("DarkPurple", bold(result.message), "✅");
+      message.channel.send({
         content: message.author.toString(),
         embeds: [embed],
       });
-    }
 
-    const embed = this.embed("DarkPurple", bold(result.message), "✅");
-    message.channel.send({
-      content: message.author.toString(),
-      embeds: [embed],
-    });
-
-    const nickname = message.member.user.username;
-    return await message.member.edit({
-      nick: `[${clan_tag}] ${nickname}`,
+      try {
+        const nickname = message.member.user.username;
+        await message.member.edit({
+          nick: `[${clan_tag}] ${nickname}`,
+        });
+      } catch (error) {
+        client.logger.error(
+          `Cannot add Clan Tag for user ${message.author.tag}`,
+          "cmd:clan-create"
+        );
+      }
     });
   }
 
@@ -288,6 +294,12 @@ export = class ClanCreateCommand extends Command {
       });
 
       buttonEmitter.emit(`gotButton-${id}`, btn.customId);
+    });
+
+    collector.on("end", (collected, reason) => {
+      if (reason === "time") {
+        buttonEmitter.emit(`noButtonCollcted-${id}`);
+      }
     });
   }
 };

@@ -1,4 +1,4 @@
-import { Message, bold, userMention } from "discord.js";
+import { APIEmbedField, Message, bold, userMention } from "discord.js";
 import { Command, CommandCategory } from "@src/classes/Command";
 import { ClanInvite } from "@modules/clans";
 import DiscordBot from "@src/classes/Discord";
@@ -70,7 +70,49 @@ export = class ClanCommand extends Command {
       invites.length ? bold(`› Заявок на вступление: ${invites.length}`) : "",
     ].join("\n");
 
-    const embed = this.embed("DarkPurple", data);
+    const AboutField: APIEmbedField = {
+      name: "О клане:",
+      value: [
+        `› Место в топе: ${index.toLocaleString("be")}`,
+        `› Название клана: ${clan.name}`,
+        `› Клан Тег: [${clan.tag}]`,
+        `› Описание клана: ${clan.description}`,
+        `› Количество участников: ${clan.members.toLocaleString("be")}`,
+        `› Владелец клана: ${clan.members.toLocaleString("be")}`,
+      ]
+        .map((str) => {
+          if (str === "") return "";
+          else return bold(str);
+        })
+        .join("\n"),
+
+      inline: true,
+    };
+
+    const InvitesField: APIEmbedField = {
+      name: "Заявки на вступление:",
+      value: [
+        `› Тип клана: ${TYPES[clan.type]}`,
+        `› Количество заявок: ${
+          invites.length > 1 ? invites.length : "Отсутствуют"
+        }`,
+        "",
+        clan.type === 0
+          ? "Заявки на вступление необходимо рассматривать используя команду `!clan-invites`"
+          : "В клан может вступить любой желающий",
+      ]
+        .map((str) => {
+          if (str === "") return "";
+          else return bold(str);
+        })
+        .join("\n"),
+
+      inline: true,
+    };
+
+    const embed = this.embed("DarkPurple", null);
+    embed.addFields(AboutField, InvitesField);
+
     return message.reply({
       embeds: [embed],
     });

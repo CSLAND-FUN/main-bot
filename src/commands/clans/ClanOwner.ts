@@ -1,6 +1,5 @@
 import { Command, CommandCategory } from "@src/classes/Command";
 import { Message, bold } from "discord.js";
-import { ClanInvite } from "@modules/clans";
 import DiscordBot from "@src/classes/Discord";
 
 export = class ClanOwnerCommand extends Command {
