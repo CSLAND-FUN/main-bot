@@ -49,7 +49,7 @@ export = class GuildMemberUpdateEvent extends Event {
               clan.id
             );
 
-            if (is_member && !newMember.nickname.includes(tag)) {
+            if (is_member && !newMember.displayName.includes(tag)) {
               try {
                 await newMember.edit({
                   nick: tag + newMember.user.username,
@@ -62,7 +62,7 @@ export = class GuildMemberUpdateEvent extends Event {
               }
 
               return;
-            } else if (!is_member && newMember.nickname.includes(tag)) {
+            } else if (!is_member && newMember.displayName.includes(tag)) {
               try {
                 await newMember.edit({
                   nick: newMember.user.username,
@@ -88,7 +88,7 @@ export = class GuildMemberUpdateEvent extends Event {
     if (!clan) return;
 
     const clanTag = `[${clan.tag}] `;
-    if (!newMember.nickname.includes(clanTag)) {
+    if (!newMember.displayName.includes(clanTag)) {
       try {
         await newMember.edit({
           nick: clanTag + newMember.user.username,

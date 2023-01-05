@@ -16,7 +16,7 @@ export = class HistoryCommand extends Command {
 
   async run(client: DiscordBot, message: Message, args: string[]) {
     const data = await client.bonuses
-      .knex<UserHistoryItem>("bonus_users_history")
+      .sql<UserHistoryItem>("bonus_users_history")
       .select()
       .where({ user_id: message.author.id })
       .finally();

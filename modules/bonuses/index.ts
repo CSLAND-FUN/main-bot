@@ -9,6 +9,7 @@ import { cancelJob, Job, scheduleJob } from "node-schedule";
 
 import DiscordBot from "@src/classes/Discord";
 import Functions from "@src/classes/Functions";
+import Voucher from "voucher-code-generator";
 import Logger from "@src/classes/Logger";
 import random from "random";
 
@@ -49,14 +50,33 @@ export interface UserHistoryItem {
   time: string;
 }
 
+export interface BonusPromocode {
+  code: string;
+  amount: number;
+
+  uses: number;
+  maxUses: number;
+
+  date: Date;
+}
+
+export interface BonusPromocodeActivation {
+  id: string;
+  code: string;
+}
+
 export enum HistoryType {
   BONUS = "BONUS",
   PRIVILEGE = "PRIVILEGE",
 }
 
+type If<R extends boolean, ForTrue, ForFalse = null> = R extends true
+  ? ForTrue
+  : ForFalse;
+
 export class BonusSystem {
   public client: DiscordBot;
-  public knex: typeof knex;
+  public sql: typeof knex;
 
   public cache: Collection<string, string[]>;
   public jobs: Collection<string, Job>;
@@ -64,7 +84,7 @@ export class BonusSystem {
 
   constructor(client: DiscordBot) {
     this.client = client;
-    this.knex = knex;
+    this.sql = knex;
 
     this.cache = new Collection();
     this.jobs = new Collection();
@@ -257,18 +277,18 @@ export class BonusSystem {
   }
 
   async all(): Promise<BonusUser[]> {
-    const data = await this.knex<BonusUser>("bonus_users").select().finally();
+    const data = await this.sql<BonusUser>("bonus_users").select().finally();
     return data;
   }
 
   async data(id: string): Promise<BonusUser> {
-    var _data = await this.knex<BonusUser>("bonus_users")
+    var _data = await this.sql<BonusUser>("bonus_users")
       .select()
       .where({ id: id })
       .finally();
 
     if (!_data.length) {
-      await this.knex<BonusUser>("bonus_users")
+      await this.sql<BonusUser>("bonus_users")
         .insert({
           id: id,
           group: 1,
@@ -285,7 +305,7 @@ export class BonusSystem {
         })
         .finally();
 
-      _data = await this.knex<BonusUser>("bonus_users")
+      _data = await this.sql<BonusUser>("bonus_users")
         .select()
         .where({ id: id })
         .finally();
@@ -301,7 +321,7 @@ export class BonusSystem {
     value: V
   ): Promise<boolean> {
     await this.data(id);
-    await this.knex<BonusUser>("bonus_users")
+    await this.sql<BonusUser>("bonus_users")
       .update({
         [key]: value,
       })
@@ -332,7 +352,7 @@ export class BonusSystem {
   }
 
   async createHistoryItem(item: UserHistoryItem): Promise<boolean> {
-    await this.knex<UserHistoryItem>("bonus_users_history").insert({
+    await this.sql<UserHistoryItem>("bonus_users_history").insert({
       ...item,
     });
 
@@ -384,6 +404,229 @@ export class BonusSystem {
     const data = await this.data(message.author.id);
     if (data.blacklisted === 1) return true;
     else return false;
+  }
+
+  async createPromocode<T extends boolean = false>(
+    amount: number,
+    maxUses: number,
+    multiple?: T,
+    count?: number
+  ): Promise<{
+    status: boolean;
+    data: BonusPromocode[] | BonusPromocode;
+  }> {
+    if (multiple === true) {
+      const _vouchers = Voucher.generate({
+        length: 8,
+        count: count,
+      });
+
+      const result: BonusPromocode[] = [];
+      for (const voucher of _vouchers) {
+        const data = {
+          code: voucher,
+          amount: amount,
+
+          uses: 0,
+          maxUses: maxUses,
+
+          date: new Date(),
+        };
+
+        result.push(data);
+
+        await this.sql<BonusPromocode>("bonus_promocodes")
+          .insert(data)
+          .finally();
+      }
+
+      return {
+        status: true,
+        data: result,
+      };
+    }
+
+    const voucher = Voucher.generate({
+      length: 8,
+      count: 1,
+    });
+
+    const data = {
+      code: voucher[0],
+      amount: amount,
+
+      uses: 0,
+      maxUses: maxUses,
+
+      date: new Date(),
+    };
+
+    await this.sql<BonusPromocode>("bonus_promocodes").insert(data).finally();
+    return {
+      status: true,
+      data: data,
+    };
+  }
+
+  async activatePromocode(
+    id: string,
+    code: string
+  ): Promise<{ status: boolean; message: string }> {
+    const promocodes = await this.sql<BonusPromocode>("bonus_promocodes")
+      .select()
+      .finally();
+
+    const promocode = promocodes.find((x) => x.code === code);
+    if (!promocode) {
+      return {
+        status: false,
+        message: "Данный промокод не найден!",
+      };
+    } else if (promocode.uses >= promocode.maxUses) {
+      return {
+        status: false,
+        message: "Использования данного промокода закончились!",
+      };
+    }
+
+    const table = "bonus_promocodes_activates";
+    const uses = await this.sql<BonusPromocodeActivation>(table)
+      .select()
+      .where({
+        id: id,
+        code: code,
+      })
+      .finally();
+
+    if (uses.length) {
+      return {
+        status: false,
+        message: "Вы уже активировали этот промокод!",
+      };
+    }
+
+    const data = await this.data(id);
+    await this.update(id, "bonuses", data.bonuses + promocode.amount);
+
+    await this.sql<BonusPromocodeActivation>(table)
+      .insert({
+        id: id,
+        code: promocode.code,
+      })
+      .finally();
+
+    await this.sql<BonusPromocode>("bonus_promocodes")
+      .update({
+        uses: promocode.uses + 1,
+      })
+      .where({
+        code: promocode.code,
+      })
+      .finally();
+
+    const word = Functions.declOfNum(promocode.amount, [
+      "бонус",
+      "бонуса",
+      "бонусов",
+    ]);
+
+    return {
+      status: true,
+      message: `Промокод на ${promocode.amount} ${word} был успешно активирован!`,
+    };
+  }
+
+  async checker() {
+    const guild = this.client.guilds.cache.get(process.env.SERVER_ID);
+    if (!guild) return;
+
+    const data = await this.sql<BonusUser>("bonus_users")
+      .select()
+      .where({
+        counting: 1,
+      })
+      .finally();
+
+    for (const user of data) {
+      const member = guild.members.cache.get(user.id);
+      if (!member) continue;
+
+      const data = await this.data(user.id);
+      if (data.counting !== 1) continue;
+
+      await this.update(user.id, "counting", 0);
+      Logger.log(
+        `Stopped counting for ${user.id} due to bot restart.`,
+        "Bonuses"
+      );
+    }
+  }
+
+  private async tables() {
+    const bonuses = "bonus_users";
+    const bonuses_table = await this.sql.schema.hasTable(bonuses);
+    if (!bonuses_table) {
+      await this.sql.schema.createTable("bonus_users", (table) => {
+        table.string("id", 50).notNullable();
+        table.integer("group", 1).notNullable().defaultTo(1);
+
+        table.integer("bonuses", 255).notNullable().defaultTo(0);
+        table.string("roles", 3).notNullable().defaultTo("");
+
+        table.boolean("counting").defaultTo(false);
+        table.boolean("blacklisted").defaultTo(false);
+        table.string("reason", 255).nullable();
+
+        table.string("bonus_used", 255).nullable();
+        table.string("newyear_used", 255).nullable();
+
+        return table;
+      });
+    }
+
+    const history = "bonus_users_history";
+    const history_table = await this.sql.schema.hasTable(history);
+    if (!history_table) {
+      await this.sql.schema.createTable("bonus_users_history", (table) => {
+        table.increments("id").primary();
+
+        table.string("user_id", 50).notNullable();
+        table.string("type", 10).notNullable();
+        table.string("message", 255).notNullable();
+
+        table.integer("cost", 255).notNullable();
+        table.string("time", 255).notNullable();
+
+        return table;
+      });
+    }
+
+    const promocodes = "bonus_promocodes";
+    const pc_table = await this.sql.schema.hasTable(promocodes);
+    if (!pc_table) {
+      await this.sql.schema.createTable(promocodes, (table) => {
+        table.string("code", 255).notNullable();
+        table.integer("amount", 255).notNullable();
+
+        table.integer("uses", 255).notNullable().defaultTo(0);
+        table.integer("maxUses", 255).notNullable();
+
+        table.date("date").notNullable();
+
+        return table;
+      });
+    }
+
+    const pc_activates = "bonus_promocodes_activates";
+    const pc_activates_table = await this.sql.schema.hasTable(pc_activates);
+    if (!pc_activates_table) {
+      await this.sql.schema.createTable(pc_activates, (table) => {
+        table.string("id", 255).notNullable();
+        table.string("code", 255).notNullable();
+
+        return table;
+      });
+    }
   }
 
   private handle() {
@@ -517,71 +760,5 @@ export class BonusSystem {
         }
       }
     });
-  }
-
-  private async tables() {
-    var bonuses_table = "bonus_users";
-    const bonuses_table_check = await this.knex.schema.hasTable(bonuses_table);
-    if (!bonuses_table_check) {
-      await this.knex.schema.createTable("bonus_users", (table) => {
-        table.string("id", 50).notNullable();
-        table.integer("group", 1).notNullable().defaultTo(1);
-
-        table.integer("bonuses", 255).notNullable().defaultTo(0);
-        table.string("roles", 3).notNullable().defaultTo("");
-
-        table.boolean("counting").defaultTo(false);
-        table.boolean("blacklisted").defaultTo(false);
-        table.string("reason", 255).nullable();
-
-        table.string("bonus_used", 255).nullable();
-        table.string("newyear_used", 255).nullable();
-
-        return table;
-      });
-    }
-
-    var history_table = "bonus_users_history";
-    const history_table_check = await this.knex.schema.hasTable(history_table);
-    if (!history_table_check) {
-      await this.knex.schema.createTable("bonus_users_history", (table) => {
-        table.increments("id").primary();
-
-        table.string("user_id", 50).notNullable();
-        table.string("type", 10).notNullable();
-        table.string("message", 255).notNullable();
-
-        table.integer("cost", 255).notNullable();
-        table.string("time", 255).notNullable();
-
-        return table;
-      });
-    }
-  }
-
-  async checker() {
-    const guild = this.client.guilds.cache.get(process.env.SERVER_ID);
-    if (!guild) return;
-
-    const data = await this.knex<BonusUser>("bonus_users")
-      .select()
-      .where({
-        counting: 1,
-      })
-      .finally();
-
-    for (const user of data) {
-      const member = guild.members.cache.get(user.id);
-      if (!member) continue;
-
-      const data = await this.data(user.id);
-      if (data.counting !== 1) continue;
-
-      await this.update(user.id, "counting", 0);
-      Logger.log(
-        `Stopped counting for ${user.id} due to bot restart.`,
-        "Bonuses"
-      );
-    }
   }
 }

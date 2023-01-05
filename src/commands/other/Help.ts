@@ -36,6 +36,8 @@ export = class HelpCommand extends Command {
     var MusicField: { name?: string; value?: string; inline?: boolean } = {};
     var ClansField: { name?: string; value?: string; inline?: boolean } = {};
     var OwnerField: { name?: string; value?: string; inline?: boolean } = {};
+    var PromocodesField: { name?: string; value?: string; inline?: boolean } =
+      {};
 
     BonusesField.name = "🪙 Система Бонусов";
     OtherField.name = "🫣 Другие команды";
@@ -44,6 +46,7 @@ export = class HelpCommand extends Command {
     MusicField.name = "🎵 Музыка";
     ClansField.name = "⚔ Кланы";
     OwnerField.name = "⚠️ Для разработчика";
+    PromocodesField.name = "💸 Промокоды";
     //? [Fields | End]
 
     //? [Bonus Commands | Start]
@@ -153,6 +156,21 @@ export = class HelpCommand extends Command {
     }
     //? [Owner Commands | End]
 
+    //? [Voucher Commands | Start]
+    const PromoOut = [];
+    const PromoCommands = client.commands
+      .filter((c) => c.data.category === CommandCategory.PROMOCODES)
+      .values();
+
+    for (const { data } of PromoCommands) {
+      const aliases = data.aliases
+        ? ` (${data.aliases.map((a) => `\`!${a}\``).join(" | ")})`
+        : "";
+
+      PromoOut.push(`\`!${data.name}\`${aliases} - ${bold(data.description)}`);
+    }
+    //? [Owner Commands | End]
+
     BonusesField.value = BonusOut.join("\n");
     OtherField.value = OtherOut.join("\n");
     LobbysField.value = LobbysOut.join("\n");
@@ -160,6 +178,7 @@ export = class HelpCommand extends Command {
     MusicField.value = MusicOut.join("\n");
     ClansField.value = ClansOut.join("\n");
     OwnerField.value = OwnerOut.join("\n");
+    PromocodesField.value = PromoOut.join("\n");
 
     const owners = process.env.OWNERS.split(",");
     if (owners.includes(message.author.id)) {
@@ -171,6 +190,7 @@ export = class HelpCommand extends Command {
         MusicField,
         ClansField,
         OwnerField,
+        PromocodesField,
       ];
     } else {
       return [

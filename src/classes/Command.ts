@@ -27,6 +27,7 @@ export enum CommandCategory {
   MUSIC = "MUSIC",
   OWNER = "OWNER",
   CLANS = "CLANS",
+  PROMOCODES = "PROMOCODES",
 }
 
 export class Command {
