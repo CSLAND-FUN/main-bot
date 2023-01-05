@@ -10,7 +10,7 @@ export = class PromocodesCommand extends Command {
       category: CommandCategory.PROMOCODES,
       name: "promocodes",
 
-      description: "Позволяет просмотреть все доступные графити.",
+      description: "Позволяет просмотреть все доступные промокоды.",
       ownerOnly: true,
     });
   }

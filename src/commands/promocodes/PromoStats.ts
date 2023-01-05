@@ -10,7 +10,7 @@ export = class PromoStatsCommand extends Command {
       category: CommandCategory.PROMOCODES,
       name: "promo-stats",
 
-      description: "Создаёт промокод на ваучеры.",
+      description: "Создаёт промокод на бонусы.",
       aliases: ["promo"],
 
       ownerOnly: true,

@@ -9,7 +9,7 @@ export = class PromoCreateCommand extends Command {
       category: CommandCategory.PROMOCODES,
       name: "promo-create",
 
-      description: "Создаёт промокод на ваучеры.",
+      description: "Создаёт промокод на бонусы.",
       ownerOnly: true,
     });
   }
