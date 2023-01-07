@@ -56,8 +56,8 @@ export = class PromoStatsCommand extends Command {
     ]);
 
     const data = [
-      `› Код: ${promo.code}`,
-      `› Использований: ${promo.uses} из ${promo.maxUses}`,
+      `› Код: \`${promo.code}\``,
+      `› Использований: ${promo.uses}/${promo.maxUses}`,
       `› Сумма: ${promo.amount} ${word}`,
       `› Дата создания: ${date}`,
     ]

@@ -46,7 +46,10 @@ export = class PromocodesCommand extends Command {
         "бонусов",
       ]);
 
-      result.push(`— ${promo.code} - ${promo.amount} ${word} | ${date}`);
+      const uses = `(${promo.uses}/${promo.maxUses})`;
+      result.push(
+        `› ${promo.code} - ${promo.amount} ${word} ${uses} | ${date}`
+      );
     }
 
     const embed = this.embed(
