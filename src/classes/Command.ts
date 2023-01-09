@@ -13,8 +13,10 @@ interface CommandData {
 
   description?: string;
   aliases?: string[];
-  ownerOnly?: boolean;
   cooldown?: number;
+
+  ownerOnly?: boolean;
+  disabled?: boolean;
 
   permissions?: PermissionsString[];
 }
@@ -38,6 +40,7 @@ export class Command {
 
     this.data.description = this.data.description ?? "Без описания.";
     this.data.cooldown = this.data.cooldown ?? null;
+    this.data.disabled = this.data.disabled ?? false;
   }
 
   run(client: DiscordBot, message: Message, args: string[]) {

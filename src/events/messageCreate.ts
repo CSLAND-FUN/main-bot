@@ -42,6 +42,22 @@ export = class MessageCreateEvent extends Event {
     }
 
     if (
+      command.data.disabled &&
+      command.data.disabled === true &&
+      !owners.includes(message.author.id)
+    ) {
+      const embed = new EmbedBuilder();
+      embed.setColor("Red");
+      embed.setDescription(
+        `❌ | **На текущий момент команда выключена и не работает.**`
+      );
+
+      return message.reply({
+        embeds: [embed],
+      });
+    }
+
+    if (
       command.data.permissions &&
       !message.member.permissions.has(command.data.permissions)
     ) {

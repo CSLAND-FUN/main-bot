@@ -28,6 +28,8 @@ export = class NewYearCommand extends Command {
 
       description: "Ежедневная новогодняя раздача в течение Нового Года.",
       cooldown: 30000,
+
+      disabled: true,
     });
   }
 
